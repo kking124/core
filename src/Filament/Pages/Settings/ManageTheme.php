@@ -5,19 +5,29 @@ namespace Cachet\Filament\Pages\Settings;
 use Cachet\Cachet;
 use Cachet\Data\Cachet\ThemeData;
 use Cachet\Settings\ThemeSettings;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Support\Colors\Color;
-use Filament\Support\Facades\FilamentColor;
 
 class ManageTheme extends SettingsPage
 {
     protected static string $settings = ThemeSettings::class;
+
+    private const COLOR_SETTINGS = [
+        'background_color',
+        'text_color',
+        'banner_background_color',
+        'background_fill_color',
+        'error_color',
+        'info_color',
+        'success_color',
+        'alert_color',
+        'notice_color',
+        'metrics_fill_color',
+        'link_color',
+    ];
 
     public static function canAccess(): bool
     {
@@ -49,64 +59,61 @@ class ManageTheme extends SettingsPage
                         ->helperText(__('cachet::settings.manage_theme.app_banner_helper'))
                         ->disk((string) config('cachet.uploads.disk'))
                         ->columnSpanFull(),
+                    TextInput::make('banner_padding')
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(128)
+                        ->suffix('px')
+                        ->label(__('cachet::settings.manage_theme.banner_padding')),
                 ]),
 
-                Section::make()->columns(2)
-                    ->heading(__('cachet::settings.manage_theme.status_page_accent.heading'))
-                    ->description(__('cachet::settings.manage_theme.status_page_accent.description'))
-                    ->schema([
-                        Select::make('accent')
-                            ->label(__('cachet::settings.manage_theme.status_page_accent.accent_color_label'))
-                            ->helperText(__('cachet::settings.manage_theme.status_page_accent.accent_color_helper'))
-                            ->options([
-                                ...collect(Color::all())
-                                    ->except(ThemeData::GRAYS)
-                                    ->prepend(FilamentColor::getColors()['cachet'], 'cachet')
-                                    ->map(function (array $shades, string $color) {
-                                        $colorName = __(ucwords($color));
+                Section::make(__('cachet::settings.manage_theme.status_page_colors.heading'))
+                    ->description(__('cachet::settings.manage_theme.status_page_colors.description'))
+                    ->columns(2)
+                    ->collapsible()
+                    ->schema(self::colorPickers()),
 
-                                        return "<div class=\"flex items-center\"><div class=\"theme-swatch\" style=\"--swatch: {$shades[400]}\"></div><div>{$colorName}</div></div>";
-                                    }),
-                            ])
-                            ->native(false)
-                            ->allowHtml()
-                            ->reactive()
-                            ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
-                                $accentPairing = $get('accent_pairing');
-
-                                if ($accentPairing) {
-                                    $set('accent_content', ThemeData::matchPairing($state));
-                                }
-                            }),
-
-                        Select::make('accent_content')
-                            ->label(__('cachet::settings.manage_theme.status_page_accent.accent_content_label'))
-                            ->helperText(__('cachet::settings.manage_theme.status_page_accent.accent_content_helper'))
-                            ->options(function () {
-                                return [
-                                    ...collect(Color::all())->only(ThemeData::GRAYS)->map(function (array $shades, string $color) {
-                                        $colorName = __(ucwords($color));
-
-                                        return "<div class=\"flex items-center\"><div class=\"theme-swatch\" style=\"--swatch: {$shades[400]}\"></div><div>{$colorName}</div></div>";
-                                    }),
-                                ];
-                            })
-                            ->native(false)
-                            ->disabled(fn (Get $get) => $get('accent_pairing') === true)
-                            ->allowHtml(),
-
-                        Toggle::make('accent_pairing')
-                            ->label(__('cachet::settings.manage_theme.status_page_accent.accent_pairing_label'))
-                            ->helperText(__('cachet::settings.manage_theme.status_page_accent.accent_pairing_helper'))
-                            ->reactive()
-                            ->afterStateUpdated(function (Get $get, Set $set, ?bool $old, ?bool $state) {
-                                $accent = $get('accent');
-
-                                if ($state) {
-                                    $set('accent_content', ThemeData::matchPairing($accent));
-                                }
-                            }),
-                    ]),
+                Section::make(__('cachet::settings.manage_theme.status_page_colors.dark_heading'))
+                    ->description(__('cachet::settings.manage_theme.status_page_colors.dark_description'))
+                    ->columns(2)
+                    ->collapsed()
+                    ->schema(self::colorPickers('_dark')),
             ]);
+    }
+
+    /** @return array<ColorPicker> */
+    private static function colorPickers(string $suffix = ''): array
+    {
+        return array_map(fn (string $name): ColorPicker => ColorPicker::make($name.$suffix)
+            ->format('hex')
+            ->label(__('cachet::settings.manage_theme.'.$name)), self::COLOR_SETTINGS);
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $defaults = $this->formDefaults();
+
+        foreach ($defaults as $name => $default) {
+            $data[$name] ??= $default;
+        }
+
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        foreach ($this->formDefaults() as $name => $default) {
+            if (isset($data[$name]) && strtolower((string) $data[$name]) === $default) {
+                $data[$name] = null;
+            }
+        }
+
+        return $data;
+    }
+
+    /** @return array<string, string> */
+    private function formDefaults(): array
+    {
+        return (new ThemeData(app(ThemeSettings::class)))->formDefaults();
     }
 }

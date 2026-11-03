@@ -6,14 +6,14 @@
 
         <div data-slot="content" class="flex flex-col gap-6 rounded-xl border border-zinc-900/10 bg-white/70 p-8 shadow-sm dark:border-white/15 dark:bg-zinc-900/50 sm:p-10">
             <div class="flex flex-col items-center gap-4 text-center">
-                <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-zinc-500/10 text-zinc-500 ring-1 ring-inset ring-zinc-500/20 dark:text-zinc-400">
+                <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-zinc-500/10 text-page/65 ring-1 ring-inset ring-zinc-500/20 ">
                     <x-heroicon-o-bell-slash class="size-6" aria-hidden="true" />
                 </span>
                 <div class="flex flex-col gap-1.5">
-                    <h1 class="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    <h1 class="text-xl font-semibold tracking-tight text-page ">
                         {{ __('cachet::subscriber.status_page.unsubscribe.heading') }}
                     </h1>
-                    <p class="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+                    <p class="text-sm leading-relaxed text-page/65 ">
                         {{ __('cachet::subscriber.status_page.unsubscribe.body', ['email' => $subscriber->email]) }}
                     </p>
                 </div>
@@ -26,7 +26,7 @@
                     {{ __('cachet::subscriber.status_page.unsubscribe.button') }}
                 </button>
 
-                <a data-slot="navigation" href="{{ route('cachet.status-page') }}" class="inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-zinc-600 ring-1 ring-inset ring-zinc-300 transition hover:bg-zinc-50 dark:text-zinc-300 dark:ring-zinc-700 dark:hover:bg-zinc-800/50">
+                <a data-slot="navigation" href="{{ route('cachet.status-page') }}" class="inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-page/80 ring-1 ring-inset ring-zinc-300 transition hover:bg-zinc-50  dark:ring-zinc-700 dark:hover:bg-zinc-800/50">
                     {{ __('cachet::subscriber.status_page.unsubscribe.cancel') }}
                 </a>
             </form>

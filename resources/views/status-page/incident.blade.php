@@ -12,7 +12,7 @@
 
         @if ($incident->components->isNotEmpty())
             <section data-component="affected-components" class="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-zinc-900/10 dark:bg-zinc-900 dark:ring-white/15">
-                <h2 data-slot="title" class="bg-zinc-50 px-4 py-3 text-lg font-semibold tracking-tight text-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-200 sm:px-6 sm:py-4">
+                <h2 data-slot="title" class="bg-zinc-50 px-4 py-3 text-lg font-semibold tracking-tight text-page dark:bg-zinc-800/50  sm:px-6 sm:py-4">
                     {{ __('cachet::incident.affected_components_header') }}
                 </h2>
 
@@ -27,7 +27,7 @@
         <nav data-component="page-navigation" class="flex justify-left">
             <div class="inline-flex items-center gap-0.5 rounded-lg bg-zinc-100 p-0.5 ring-1 ring-zinc-900/10 dark:bg-zinc-800/80 dark:ring-white/15">
                 <a href="{{ route('cachet.status-page') }}"
-                    class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-zinc-600 transition hover:bg-white hover:text-zinc-900 hover:shadow-sm hover:ring-1 hover:ring-zinc-900/10 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white dark:hover:ring-white/15">
+                    class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-page/80 transition hover:bg-white hover:text-page hover:shadow-sm hover:ring-1 hover:ring-zinc-900/10  dark:hover:bg-zinc-700 dark:hover:text-white dark:hover:ring-white/15">
                     <x-heroicon-m-chevron-left class="size-3.5" />
                     {{ __('cachet::incident.timeline.navigate.timeline') }}
                 </a>

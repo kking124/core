@@ -13,12 +13,12 @@ function getCssVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 }
 
-function getFontColor() {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches === true) {
-        return `rgba(${getCssVar('--gray-100')}, 1)`
-    }
+function isDarkTheme() {
+    return document.documentElement.dataset.theme === 'dark'
+}
 
-    return `rgba(${getCssVar('--gray-800')}, 1)`
+function getFontColor() {
+    return getCssVar('--page-text-color')
 }
 
 function withAlpha(color, alpha) {
@@ -27,8 +27,8 @@ function withAlpha(color, alpha) {
 
 function getThemeColors() {
     const fontColor = getFontColor()
-    const accent = getCssVar('--accent')
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const accent = getCssVar('--metrics-fill-color') || getCssVar('--accent')
+    const isDark = isDarkTheme()
     const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)'
     const mutedColor = isDark ? 'rgba(161, 161, 170, 1)' : 'rgba(113, 113, 122, 1)'
 
@@ -123,7 +123,7 @@ window.cachetMetricChart = function () {
         chart.update()
     })
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    const themeObserver = new MutationObserver(() => {
         themeColors = getThemeColors()
         chart.data.datasets[0].backgroundColor = themeColors.fillColor
         chart.data.datasets[0].borderColor = themeColors.borderColor
@@ -133,4 +133,6 @@ window.cachetMetricChart = function () {
         chart.options.scales.y.grid.color = themeColors.gridColor
         chart.update()
     })
+
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
 }

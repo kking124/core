@@ -2,7 +2,7 @@
 
 namespace Cachet\Enums;
 
-use Filament\Support\Colors\Color;
+use Cachet\Data\Cachet\ThemeData;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
@@ -28,10 +28,10 @@ enum SystemStatusEnum implements HasColor, HasIcon, HasLabel
     public function getColor(): array
     {
         return match ($this) {
-            self::operational => Color::Green,
-            self::partial_outage => Color::Amber,
-            self::major_outage => Color::Red,
-            self::under_maintenance => Color::Orange,
+            self::operational => ThemeData::statusPalette('success'),
+            self::partial_outage => ThemeData::statusPalette('alert'),
+            self::major_outage => ThemeData::statusPalette('error'),
+            self::under_maintenance => ThemeData::statusPalette('notice'),
         };
     }
 

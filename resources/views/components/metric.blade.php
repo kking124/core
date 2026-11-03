@@ -10,7 +10,7 @@
      data-metric-id="{{ $metric->getKey() }}"
      data-cachet-metric
      x-data="chart_{{ $metric->id }}"
-     class="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-zinc-900/10 dark:bg-zinc-900 dark:ring-white/15">
+    class="group relative overflow-hidden rounded-lg bg-[var(--background-fill-color)] shadow-sm ring-1 ring-zinc-900/10 dark:ring-white/15">
     <div data-slot="content" class="flex flex-col gap-4 p-4 sm:gap-5 sm:p-6">
         <div data-slot="header" class="flex flex-wrap items-start justify-between gap-3">
             <div class="flex min-w-0 flex-col gap-1">

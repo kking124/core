@@ -74,15 +74,5 @@ return [
     'manage_theme' => [
         'app_banner_label' => 'Imagem do Banner',
         'app_banner_helper' => 'Uma imagem exibida no topo da página de status.',
-        'status_page_accent' => [
-            'heading' => 'Cor de Destaque da Página de Status',
-            'description' => 'Personalize a cor de destaque da sua página de status. O Cachet pode selecionar automaticamente uma cor base correspondente.',
-            'accent_color_label' => 'Cor de Destaque',
-            'accent_color_helper' => 'Cor principal usada para títulos, links e estados ativos.',
-            'accent_content_label' => 'Cor Base',
-            'accent_content_helper' => 'Cor base neutra combinada com o destaque. Desativada quando a combinação de destaque está ativa.',
-            'accent_pairing_label' => 'Combinação de Destaque',
-            'accent_pairing_helper' => 'Seleciona automaticamente uma cor base que complemente o destaque.',
-        ],
     ],
 ];

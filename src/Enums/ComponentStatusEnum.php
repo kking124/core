@@ -2,6 +2,7 @@
 
 namespace Cachet\Enums;
 
+use Cachet\Data\Cachet\ThemeData;
 use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
@@ -70,12 +71,11 @@ enum ComponentStatusEnum: int implements HasColor, HasIcon, HasLabel
     public function getTextColorClasses(): string
     {
         return match ($this) {
-            self::operational => 'text-green-600 dark:text-green-400',
-            self::performance_issues => 'text-purple-600 dark:text-purple-400',
-            self::partial_outage => 'text-amber-600 dark:text-amber-400',
-            self::major_outage => 'text-red-600 dark:text-red-400',
-            self::under_maintenance => 'text-orange-600 dark:text-orange-400',
-            default => 'text-blue-600 dark:text-blue-400',
+            self::operational => 'text-status-success',
+            self::performance_issues, self::partial_outage => 'text-status-alert',
+            self::major_outage => 'text-status-error',
+            self::under_maintenance => 'text-status-notice',
+            default => 'text-status-info',
         };
     }
 
@@ -94,12 +94,12 @@ enum ComponentStatusEnum: int implements HasColor, HasIcon, HasLabel
     public function getColor(): array
     {
         return match ($this) {
-            self::operational => Color::Green,
+            self::operational => ThemeData::statusPalette('success'),
             self::performance_issues => Color::Purple,
-            self::partial_outage => Color::Amber,
-            self::major_outage => Color::Red,
-            self::under_maintenance => Color::Orange,
-            default => Color::Blue,
+            self::partial_outage => ThemeData::statusPalette('alert'),
+            self::major_outage => ThemeData::statusPalette('error'),
+            self::under_maintenance => ThemeData::statusPalette('notice'),
+            default => ThemeData::statusPalette('info'),
         };
     }
 }

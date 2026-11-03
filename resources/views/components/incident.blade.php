@@ -10,7 +10,7 @@
 {{ \Cachet\Facades\CachetView::renderHook(\Cachet\View\RenderHook::STATUS_PAGE_INCIDENTS_BEFORE) }}
 <div data-component="incident-day" data-date="{{ $date }}" @class(['relative flex flex-col', 'gap-5' => count($incidents) > 0 || count($schedules) > 0, 'gap-2' => count($incidents) === 0 && count($schedules) === 0]) x-data="{ forDate: new Date(@js($date)) }">
     @if($withDate)
-        <h3 data-slot="date" class="border-b border-zinc-900/10 pb-2 text-base font-semibold tracking-tight text-zinc-800 dark:border-white/15 dark:text-zinc-200">
+        <h3 data-slot="date" class="border-b border-zinc-900/10 pb-2 text-base font-semibold tracking-tight text-page dark:border-white/15 ">
             <time datetime="{{ $date }}" x-text="forDate.toLocaleDateString(undefined, { dateStyle: 'medium'@if($appSettings->timezone !== '-'), timeZone: '{{ $appSettings->timezone }}'@endif })"></time>
         </h3>
     @endif
@@ -25,23 +25,23 @@
                     <div class="flex flex-1 flex-col gap-1">
                         <div class="flex items-center gap-2">
                             @if ($headingLevel === 1)
-                                <h1 data-slot="title" class="max-w-full break-words text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-2xl">
+                                <h1 data-slot="title" class="max-w-full break-words text-xl font-semibold tracking-tight text-page  sm:text-2xl">
                                     {{ $incident->name }}
                                 </h1>
                             @else
-                                <h3 data-slot="title" class="max-w-full break-words text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-lg">
+                                <h3 data-slot="title" class="max-w-full break-words text-base font-semibold tracking-tight text-page  sm:text-lg">
                                     <a href="{{ route('cachet.status-page.incident', $incident) }}" class="transition hover:text-accent-content">{{ $incident->name }}</a>
                                 </h3>
                             @endif
                             @auth
                                 <a href="{{ $incident->filamentDashboardEditUrl() }}"
-                                   class="text-zinc-400 transition hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200"
+                                   class="text-page/50 transition hover:text-page  dark:hover:text-page"
                                    title="{{ __('cachet::incident.edit_button_title') }}">
                                     <x-heroicon-m-pencil-square class="size-4" />
                                 </a>
                             @endauth
                         </div>
-                        <span data-slot="timestamp" class="text-xs text-zinc-500 dark:text-zinc-400">
+                        <span data-slot="timestamp" class="text-xs text-page/65 ">
                             <x-cachet::timestamp :timestamp="$incident->timestamp" />
                         </span>
                     </div>
@@ -51,7 +51,7 @@
                 </div>
 
                 @if ($incident->components->isNotEmpty())
-                    <div data-slot="affected-components" class="text-xs text-zinc-500 dark:text-zinc-400">
+                    <div data-slot="affected-components" class="text-xs text-page/65 ">
                         {{ __('Affected Components') }}: {{ $incident->components->pluck('name')->join(', ', ' and ') }}
                     </div>
                 @endif
@@ -68,11 +68,11 @@
                             <div @if($headingLevel === 1) id="update-{{ $update->getKey() }}" @endif data-component="incident-update" data-update-id="{{ $update->getKey() }}" class="relative py-5 sm:last:pb-6" x-data="{ timestamp: new Date(@js($update->created_at)) }">
                                 <x-cachet::incident-update-status :status="$update->status" />
                                 @if ($headingLevel === 1)
-                                    <h2 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-base">{{ $update->status->getLabel() }}</h2>
+                                    <h2 class="text-sm font-semibold tracking-tight text-page  sm:text-base">{{ $update->status->getLabel() }}</h2>
                                 @else
-                                    <h3 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-base">{{ $update->status->getLabel() }}</h3>
+                                    <h3 class="text-sm font-semibold tracking-tight text-page  sm:text-base">{{ $update->status->getLabel() }}</h3>
                                 @endif
-                                <span class="text-xs text-zinc-500 dark:text-zinc-400">
+                                <span class="text-xs text-page/65 ">
                                     <x-cachet::timestamp :timestamp="$update->created_at" />
                                 </span>
                                 <div data-slot="message" class="prose-sm md:prose prose-zinc dark:prose-invert prose-a:text-accent-content prose-a:underline prose-p:leading-normal mt-2">{!! $update->formattedMessage() !!}</div>
@@ -82,11 +82,11 @@
                             @php($reportStatus = $incident->updates->isEmpty() ? $incident->status : null)
                             <x-cachet::incident-update-status :status="$reportStatus ?? IncidentStatusEnum::unknown" />
                             @if ($headingLevel === 1)
-                                <h2 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-base">{{ $reportStatus?->getLabel() ?? __('Reported') }}</h2>
+                                <h2 class="text-sm font-semibold tracking-tight text-page  sm:text-base">{{ $reportStatus?->getLabel() ?? __('Reported') }}</h2>
                             @else
-                                <h3 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-base">{{ $reportStatus?->getLabel() ?? __('Reported') }}</h3>
+                                <h3 class="text-sm font-semibold tracking-tight text-page  sm:text-base">{{ $reportStatus?->getLabel() ?? __('Reported') }}</h3>
                             @endif
-                            <span class="text-xs text-zinc-500 dark:text-zinc-400">
+                            <span class="text-xs text-page/65 ">
                                 <x-cachet::timestamp :timestamp="$incident->timestamp" />
                             </span>
                             <div data-slot="message" class="prose-sm md:prose prose-zinc dark:prose-invert prose-a:text-accent-content prose-a:underline prose-p:leading-normal mt-2">{!! $incident->formattedMessage() !!}</div>
@@ -108,10 +108,10 @@
 
                 <div class="flex flex-col-reverse items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <div class="flex flex-1 flex-col gap-1">
-                        <h3 data-slot="title" class="max-w-full break-words text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-lg">
+                        <h3 data-slot="title" class="max-w-full break-words text-base font-semibold tracking-tight text-page  sm:text-lg">
                             {{ $schedule->name }}
                         </h3>
-                        <span data-slot="timestamp" class="text-xs text-zinc-500 dark:text-zinc-400">
+                        <span data-slot="timestamp" class="text-xs text-page/65 ">
                             <x-cachet::timestamp :timestamp="$schedule->completed_at" />
                         </span>
                     </div>
@@ -121,7 +121,7 @@
                 </div>
 
                 @if ($schedule->components->isNotEmpty())
-                    <div data-slot="affected-components" class="text-xs text-zinc-500 dark:text-zinc-400">
+                    <div data-slot="affected-components" class="text-xs text-page/65 ">
                         {{ __('Affected Components') }}: {{ $schedule->components->pluck('name')->join(', ', ' and ') }}
                     </div>
                 @endif
@@ -135,7 +135,7 @@
                 <div data-slot="updates" class="flex flex-col divide-y divide-zinc-900/10 px-4 dark:divide-white/15 sm:px-6">
                     @foreach ($schedule->updates as $update)
                         <div data-component="schedule-update" data-update-id="{{ $update->getKey() }}" class="relative py-5 sm:last:pb-6" x-data="{ timestamp: new Date(@js($update->created_at)) }">
-                            <span class="text-xs text-zinc-500 dark:text-zinc-400">
+                            <span class="text-xs text-page/65 ">
                                 <x-cachet::timestamp :timestamp="$update->created_at" />
                             </span>
                             <div data-slot="message" class="prose-sm md:prose prose-zinc dark:prose-invert prose-a:text-accent-content prose-a:underline prose-p:leading-normal mt-2">{!! $update->formattedMessage() !!}</div>
@@ -147,7 +147,7 @@
     @endforeach
 
     @if (count($incidents) === 0 && count($schedules) === 0)
-        <p data-slot="empty" class="text-sm text-zinc-500 dark:text-zinc-400">
+        <p data-slot="empty" class="text-sm text-page/65 ">
             {{ __('cachet::incident.no_incidents_reported') }}
         </p>
     @endif

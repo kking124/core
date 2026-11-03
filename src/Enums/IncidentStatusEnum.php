@@ -2,6 +2,7 @@
 
 namespace Cachet\Enums;
 
+use Cachet\Data\Cachet\ThemeData;
 use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
@@ -61,11 +62,11 @@ enum IncidentStatusEnum: int implements HasColor, HasIcon, HasLabel
     public function getColor(): array
     {
         return match ($this) {
-            self::investigating => Color::Blue,
-            self::watching => Color::Amber,
-            self::fixed => Color::Green,
+            self::investigating => ThemeData::statusPalette('info'),
+            self::watching => ThemeData::statusPalette('alert'),
+            self::fixed => ThemeData::statusPalette('success'),
             self::identified => Color::Purple,
-            default => Color::Red,
+            default => ThemeData::statusPalette('error'),
         };
     }
 }

@@ -74,15 +74,5 @@ return [
     'manage_theme' => [
         'app_banner_label' => 'Imagen de Banner',
         'app_banner_helper' => 'Una imagen mostrada en la parte superior de la página de estado.',
-        'status_page_accent' => [
-            'heading' => 'Acento de la Página de Estado',
-            'description' => 'Personaliza el color de acento de tu página de estado. Cachet puede seleccionar automáticamente un color base coincidente.',
-            'accent_color_label' => 'Color de Acento',
-            'accent_color_helper' => 'Color principal usado para títulos, enlaces y estados activos.',
-            'accent_content_label' => 'Color Base',
-            'accent_content_helper' => 'Color base neutro emparejado con el acento. Se desactiva cuando la combinación de acento está activa.',
-            'accent_pairing_label' => 'Combinación de Acento',
-            'accent_pairing_helper' => 'Selecciona automáticamente un color base que complemente el acento.',
-        ],
     ],
 ];

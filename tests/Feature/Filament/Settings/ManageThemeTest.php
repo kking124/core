@@ -3,7 +3,9 @@
 namespace Tests\Feature\Filament\Settings;
 
 use Cachet\Filament\Pages\Settings\ManageTheme;
+use Cachet\Settings\ThemeSettings;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -70,4 +72,41 @@ it('accepts app logos within the configured constraints', function () {
         ])
         ->call('save')
         ->assertHasNoFormErrors();
+});
+
+it('provides light and dark color pickers with their effective defaults', function () {
+    $component = livewire(ManageTheme::class);
+
+    foreach ([
+        'background_color', 'text_color', 'banner_background_color', 'background_fill_color',
+        'error_color', 'info_color', 'success_color', 'alert_color', 'notice_color',
+        'metrics_fill_color', 'link_color',
+    ] as $name) {
+        $component->assertFormFieldExists($name, fn (ColorPicker $field): bool => $field->getFormat() === 'hex');
+        $component->assertFormFieldExists($name.'_dark', fn (ColorPicker $field): bool => $field->getFormat() === 'hex');
+    }
+
+    $component->assertSet('data.text_color', '#3f3f46')
+        ->assertSet('data.text_color_dark', '#d4d4d8');
+});
+
+it('stores unchanged default colors as null and persists changed colors', function () {
+    livewire(ManageTheme::class)
+        ->call('save');
+
+    expect(app(ThemeSettings::class)->text_color)->toBeNull();
+
+    livewire(ManageTheme::class)
+        ->fillForm([
+            'text_color' => '#112233',
+            'text_color_dark' => '#aabbcc',
+            'banner_padding' => 24,
+        ])
+        ->call('save');
+
+    $settings = app(ThemeSettings::class);
+
+    expect($settings->text_color)->toBe('#112233')
+        ->and($settings->text_color_dark)->toBe('#aabbcc')
+        ->and($settings->banner_padding)->toBe(24);
 });

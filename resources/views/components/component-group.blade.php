@@ -4,11 +4,11 @@
 @php($showComponentGroupStatus = app(\Cachet\Settings\AppSettings::class)->show_component_group_status)
 <li data-component="component-group" data-component-group-id="{{ $componentGroup->getKey() }}" x-data x-disclosure @if ($componentGroup->isExpanded(auth()->user())) default-open @endif>
     <button data-slot="trigger" x-disclosure:button class="relative flex w-full flex-col items-start gap-2 py-4 pl-6 pr-4 text-left transition hover:bg-zinc-50/60 dark:hover:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-5 sm:pl-6 sm:pr-6">
-    <span data-slot="indicator" class="absolute left-2 top-7 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 sm:top-1/2">
+    <span data-slot="indicator" class="absolute left-2 top-7 -translate-y-1/2 text-page/50  sm:top-1/2">
             <x-heroicon-m-chevron-right ::class="$disclosure.isOpen && 'rotate-90'" class="size-3.5 transition" />
         </span>
 
-        <h2 data-slot="title" class="min-w-0 truncate font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+        <h2 data-slot="title" class="min-w-0 truncate font-semibold tracking-tight text-page ">
             {{ $componentGroup->name }}
         </h2>
 
@@ -18,7 +18,7 @@
                 {{ $groupStatus->getLabel() }}
             </span>
         @else
-            <span data-slot="status" class="shrink-0 text-sm font-semibold tracking-tight text-zinc-600 dark:text-zinc-300">
+            <span data-slot="status" class="shrink-0 text-sm font-semibold tracking-tight text-page/80 ">
                 {{ trans_choice('cachet::component_group.incident_count', $componentGroup->openIncidentCount()) }}
             </span>
         @endif

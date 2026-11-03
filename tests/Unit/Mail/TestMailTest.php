@@ -19,11 +19,8 @@ it('renders the themed test email', function () {
         ->toContain(app(AppSettings::class)->name);
 });
 
-it('uses the configured theme accent color', function () {
+it('uses the theme accent color', function () {
     $theme = app(ThemeSettings::class);
-    $theme->accent = 'purple';
-    $theme->save();
-
     $accent = MailThemeComposer::hex((new ThemeData($theme))->lightColors()['accent']);
 
     expect((new TestMail)->render())->toContain($accent);

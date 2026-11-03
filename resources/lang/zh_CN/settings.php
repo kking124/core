@@ -74,15 +74,5 @@ return [
     'manage_theme' => [
         'app_banner_label' => '横幅图像',
         'app_banner_helper' => '显示在状态页面顶部的图像。',
-        'status_page_accent' => [
-            'heading' => '状态页面强调色',
-            'description' => '自定义状态页面的强调色。Cachet 可以自动选择匹配的基础色。',
-            'accent_color_label' => '强调色',
-            'accent_color_helper' => '用于标题、链接和活动状态的主要颜色。',
-            'accent_content_label' => '基础色',
-            'accent_content_helper' => '与强调色搭配的中性基础色。当强调色配对启用时禁用。',
-            'accent_pairing_label' => '强调色配对',
-            'accent_pairing_helper' => '自动选择与强调色相配的基础色。',
-        ],
     ],
 ];

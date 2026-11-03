@@ -74,15 +74,5 @@ return [
     'manage_theme' => [
         'app_banner_label' => '배너 이미지',
         'app_banner_helper' => '상태 페이지 상단에 표시되는 이미지입니다.',
-        'status_page_accent' => [
-            'heading' => '상태 페이지 강조색',
-            'description' => '상태 페이지의 강조색을 사용자 정의하세요. Cachet는 자동으로 일치하는 기본 색상을 선택할 수 있습니다.',
-            'accent_color_label' => '강조색',
-            'accent_color_helper' => '제목, 링크 및 활성 상태에 사용되는 기본 색상입니다.',
-            'accent_content_label' => '기본 색상',
-            'accent_content_helper' => '강조색과 짝을 이루는 중립적인 기본 색상입니다. 강조색 페어링이 활성화되면 비활성화됩니다.',
-            'accent_pairing_label' => '강조색 페어링',
-            'accent_pairing_helper' => '강조색을 보완하는 기본 색상을 자동으로 선택합니다.',
-        ],
     ],
 ];

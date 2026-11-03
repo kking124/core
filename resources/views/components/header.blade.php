@@ -1,6 +1,6 @@
 {{ \Cachet\Facades\CachetView::renderHook(\Cachet\View\RenderHook::STATUS_PAGE_NAVIGATION_BEFORE) }}
 <header data-component="header" class="status-header">
-    <div data-slot="content" class="container mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <div data-slot="content" class="container mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <a data-slot="brand" href="{{ route('cachet.status-page') }}" aria-label="{{ __('cachet::navigation.resources.items.status_page') }}" class="inline-flex items-center transition hover:opacity-80">
             @if($appBanner)
                 <img src="{{ Storage::disk(config('cachet.uploads.disk', 'public'))->url($appBanner) }}" alt="{{ $siteName }}" class="h-8 w-auto" />
@@ -10,6 +10,10 @@
         </a>
 
         <nav data-slot="navigation" class="flex items-center gap-3 sm:gap-4">
+            <button data-slot="theme-toggle" type="button" aria-label="{{ __('cachet::cachet.toggle_theme') }}" x-data="{ isDark: document.documentElement.dataset.theme === 'dark' }" x-init="new MutationObserver(() => isDark = document.documentElement.dataset.theme === 'dark').observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })" x-on:click="window.cachetSetTheme(isDark ? 'light' : 'dark')" class="inline-flex size-10 items-center justify-center rounded-md text-page/80 transition hover:bg-black/5 hover:text-page dark:hover:bg-white/10">
+                <x-heroicon-o-sun x-show="isDark" x-cloak class="size-5" />
+                <x-heroicon-o-moon x-show="! isDark" x-cloak class="size-5" />
+            </button>
             @if ($allowSubscribers)
                 <a data-slot="subscribe" href="{{ route('cachet.subscribers.create') }}" class="inline-flex min-h-10 items-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold text-accent-content ring-1 ring-inset ring-accent/40 transition hover:bg-accent/10">
                     {{ __('cachet::subscriber.status_page.subscribe.button_label') }}

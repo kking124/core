@@ -73,15 +73,5 @@ return [
     'manage_theme' => [
         'app_banner_label' => 'Bannerbild',
         'app_banner_helper' => 'Ein Bild, das oben auf der Statusseite angezeigt wird.',
-        'status_page_accent' => [
-            'heading' => 'Statusseiten-Akzent',
-            'description' => 'Passe die Akzentfarbe der Statusseite an. Cachet kann automatisch eine passende Grundfarbe auswählen.',
-            'accent_color_label' => 'Akzent-Farbe',
-            'accent_color_helper' => 'Primärfarbe, die für Überschriften, Links und aktive Zustände verwendet wird.',
-            'accent_content_label' => 'Basis-Farbe',
-            'accent_content_helper' => 'Neutrale Basisfarbe, die mit dem Akzent kombiniert wird. Deaktiviert, wenn die Akzentpaarung aktiv ist.',
-            'accent_pairing_label' => 'Akzentpaarung',
-            'accent_pairing_helper' => 'Wähle automatisch eine Basisfarbe, die zum Akzent passt.',
-        ],
     ],
 ];

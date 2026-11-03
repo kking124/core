@@ -11,284 +11,36 @@ use Spatie\LaravelData\Attributes\Validation\Required;
 
 final class ThemeData extends BaseData
 {
-    public const GRAYS = ['slate', 'gray', 'zinc', 'neutral', 'stone', 'mauve', 'olive', 'mist', 'taupe'];
-
-    private const DEFAULT_PAIRING = 'zinc';
-
-    private const THEME_PAIRINGS = [
-        'cachet' => 'zinc',
-        'red' => 'zinc',
-        'orange' => 'neutral',
-        'amber' => 'neutral',
-        'yellow' => 'stone',
-        'lime' => 'zinc',
-        'green' => 'zinc',
-        'emerald' => 'zinc',
-        'teal' => 'gray',
-        'cyan' => 'gray',
-        'sky' => 'gray',
-        'blue' => 'slate',
-        'indigo' => 'slate',
-        'violet' => 'gray',
-        'purple' => 'gray',
-        'fuchsia' => 'zinc',
-        'pink' => 'zinc',
-        'rose' => 'zinc',
+    private const STATUS_FALLBACKS = [
+        'success' => Color::Green[600],
+        'info' => Color::Blue[600],
+        'alert' => Color::Amber[600],
+        'error' => Color::Red[600],
+        'notice' => Color::Orange[600],
     ];
 
-    private const THEMES = [
-        'gray' => [
-            'light' => [
-                'accent' => Color::Gray[800],
-                'accent-content' => Color::Gray[800],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => 'oklch(1 0 0)',
-                'accent-content' => 'oklch(1 0 0)',
-                'accent-foreground' => Color::Gray[800],
-            ],
-        ],
-        'zinc' => [
-            'light' => [
-                'accent' => Color::Zinc[800],
-                'accent-content' => Color::Zinc[800],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => 'oklch(1 0 0)',
-                'accent-content' => 'oklch(1 0 0)',
-                'accent-foreground' => Color::Zinc[800],
-            ],
-        ],
-        'neutral' => [
-            'light' => [
-                'accent' => Color::Neutral[800],
-                'accent-content' => Color::Neutral[800],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => 'oklch(1 0 0)',
-                'accent-content' => 'oklch(1 0 0)',
-                'accent-foreground' => Color::Neutral[800],
-            ],
-        ],
-        'stone' => [
-            'light' => [
-                'accent' => Color::Stone[800],
-                'accent-content' => Color::Stone[800],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => 'oklch(1 0 0)',
-                'accent-content' => 'oklch(1 0 0)',
-                'accent-foreground' => Color::Stone[800],
-            ],
-        ],
-        'red' => [
-            'light' => [
-                'accent' => Color::Red[500],
-                'accent-content' => Color::Red[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Red[500],
-                'accent-content' => Color::Red[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'orange' => [
-            'light' => [
-                'accent' => Color::Orange[500],
-                'accent-content' => Color::Orange[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Orange[400],
-                'accent-content' => Color::Orange[400],
-                'accent-foreground' => Color::Orange[950],
-            ],
-        ],
-        'amber' => [
-            'light' => [
-                'accent' => Color::Amber[400],
-                'accent-content' => Color::Amber[600],
-                'accent-foreground' => Color::Amber[950],
-            ],
-            'dark' => [
-                'accent' => Color::Amber[400],
-                'accent-content' => Color::Amber[400],
-                'accent-foreground' => Color::Amber[950],
-            ],
-        ],
-        'yellow' => [
-            'light' => [
-                'accent' => Color::Yellow[400],
-                'accent-content' => Color::Yellow[600],
-                'accent-foreground' => Color::Yellow[950],
-            ],
-            'dark' => [
-                'accent' => Color::Yellow[400],
-                'accent-content' => Color::Yellow[400],
-                'accent-foreground' => Color::Yellow[950],
-            ],
-        ],
-        'lime' => [
-            'light' => [
-                'accent' => Color::Lime[400],
-                'accent-content' => Color::Lime[600],
-                'accent-foreground' => Color::Lime[900],
-            ],
-            'dark' => [
-                'accent' => Color::Lime[400],
-                'accent-content' => Color::Lime[400],
-                'accent-foreground' => Color::Lime[950],
-            ],
-        ],
-        'green' => [
-            'light' => [
-                'accent' => Color::Green[600],
-                'accent-content' => Color::Green[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Green[600],
-                'accent-content' => Color::Green[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'emerald' => [
-            'light' => [
-                'accent' => Color::Emerald[600],
-                'accent-content' => Color::Emerald[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Emerald[600],
-                'accent-content' => Color::Emerald[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'teal' => [
-            'light' => [
-                'accent' => Color::Teal[600],
-                'accent-content' => Color::Teal[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Teal[600],
-                'accent-content' => Color::Teal[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'cyan' => [
-            'light' => [
-                'accent' => Color::Cyan[600],
-                'accent-content' => Color::Cyan[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Cyan[600],
-                'accent-content' => Color::Cyan[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'sky' => [
-            'light' => [
-                'accent' => Color::Sky[600],
-                'accent-content' => Color::Sky[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Sky[600],
-                'accent-content' => Color::Sky[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'blue' => [
-            'light' => [
-                'accent' => Color::Blue[500],
-                'accent-content' => Color::Blue[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Blue[500],
-                'accent-content' => Color::Blue[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'indigo' => [
-            'light' => [
-                'accent' => Color::Indigo[500],
-                'accent-content' => Color::Indigo[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Indigo[500],
-                'accent-content' => Color::Indigo[300],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'violet' => [
-            'light' => [
-                'accent' => Color::Violet[500],
-                'accent-content' => Color::Violet[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Violet[500],
-                'accent-content' => Color::Violet[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'purple' => [
-            'light' => [
-                'accent' => Color::Purple[500],
-                'accent-content' => Color::Purple[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Purple[500],
-                'accent-content' => Color::Purple[300],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'fuchsia' => [
-            'light' => [
-                'accent' => Color::Fuchsia[600],
-                'accent-content' => Color::Fuchsia[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Fuchsia[600],
-                'accent-content' => Color::Fuchsia[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'pink' => [
-            'light' => [
-                'accent' => Color::Pink[600],
-                'accent-content' => Color::Pink[600],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Pink[600],
-                'accent-content' => Color::Pink[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
-        'rose' => [
-            'light' => [
-                'accent' => Color::Rose[500],
-                'accent-content' => Color::Rose[500],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-            'dark' => [
-                'accent' => Color::Rose[500],
-                'accent-content' => Color::Rose[400],
-                'accent-foreground' => 'oklch(1 0 0)',
-            ],
-        ],
+    /**
+     * Palette built from a configurable status color (success, info, alert, error, notice).
+     *
+     * @return array<int, string>
+     */
+    public static function statusPalette(string $status): array
+    {
+        $configured = app(ThemeSettings::class)->{$status.'_color'};
+
+        return Color::generateV3Palette($configured ?: self::STATUS_FALLBACKS[$status]);
+    }
+
+    private const CSS_NAMES = [
+        'background_color' => 'page-background-color',
+        'text_color' => 'page-text-color',
+    ];
+
+    private const SURFACE_COLORS = [
+        'background_color',
+        'text_color',
+        'banner_background_color',
+        'background_fill_color',
     ];
 
     #[Computed]
@@ -296,6 +48,9 @@ final class ThemeData extends BaseData
 
     /** @var array<string, string> */
     private array $lightColors = [];
+
+    /** @var array<string, array{light: string, dark: string}> */
+    private array $formDefaults = [];
 
     public function __construct(
         #[Required]
@@ -309,66 +64,124 @@ final class ThemeData extends BaseData
      */
     protected function generate(): void
     {
-        $accent = $this->themeSettings->accent;
-        if (! isset(self::THEMES[$accent])) {
-            $primaryColor = FilamentColor::getColors()['cachet'];
+        $primaryColor = FilamentColor::getColors()['cachet'];
 
-            $theme = [
-                'light' => [
-                    'accent' => $primaryColor[500],
-                    'accent-content' => $primaryColor[500],
-                    'accent-foreground' => 'oklch(1 0 0)',
-                ],
-                'dark' => [
-                    'accent' => $primaryColor[500],
-                    'accent-content' => $primaryColor[400],
-                    'accent-foreground' => $primaryColor[950],
-                ],
-            ];
-        } else {
-            $theme = self::THEMES[$accent];
-        }
+        $theme = [
+            'light' => [
+                'accent' => $primaryColor[500],
+                'accent-content' => $primaryColor[500],
+                'accent-foreground' => 'oklch(1 0 0)',
+            ],
+            'dark' => [
+                'accent' => $primaryColor[500],
+                'accent-content' => $primaryColor[400],
+                'accent-foreground' => $primaryColor[950],
+            ],
+        ];
 
-        if ($this->themeSettings->accent_pairing) {
-            $pairing = self::matchPairing($accent);
-        } else {
-            $pairing = $this->themeSettings->accent_content ?? self::matchPairing($accent);
-        }
-
-        $this->styles = $this->compileCss($theme, $pairing);
+        $this->styles = $this->compileCss($theme);
     }
 
     /**
-     * Compile the CSS from the theme and background pairing.
+     * Compile the CSS from the theme.
      */
-    protected function compileCss(array $theme, string $pairing): string
+    protected function compileCss(array $theme): string
     {
-        $pairingColor = Color::all()[$pairing] ?? Color::all()[self::DEFAULT_PAIRING];
+        $pairingColor = Color::Zinc;
+        $defaults = $this->defaultColors($theme, $pairingColor);
+        $lightVariables = [
+            '--accent' => $theme['light']['accent'],
+            '--accent-content' => $theme['light']['accent-content'],
+            '--accent-foreground' => $theme['light']['accent-foreground'],
+            '--accent-background' => $pairingColor[50],
+            '--banner-padding' => ($this->themeSettings->banner_padding ?? 16).'px',
+        ];
+        $darkVariables = [
+            '--accent' => $theme['dark']['accent'],
+            '--accent-content' => $theme['dark']['accent-content'],
+            '--accent-foreground' => $theme['dark']['accent-foreground'],
+            '--accent-background' => $pairingColor[900],
+        ];
+
+        foreach ($defaults as $setting => $colors) {
+            $cssName = self::CSS_NAMES[$setting] ?? str_replace('_', '-', $setting);
+            $lightValue = $this->themeSettings->{$setting};
+            $lightVariables['--'.$cssName] = $this->color($lightValue, $colors['light']);
+            $darkSetting = $setting.'_dark';
+            $darkFallback = in_array($setting, self::SURFACE_COLORS, true)
+                ? $colors['dark']
+                : $this->color($lightValue, $colors['dark']);
+            $darkVariables['--'.$cssName] = $this->color($this->themeSettings->{$darkSetting}, $darkFallback);
+            $this->formDefaults[$setting] = [
+                'light' => $this->toHex($colors['light']),
+                'dark' => $this->toHex($darkFallback),
+            ];
+        }
+
+        foreach (['--accent', '--accent-content'] as $variable) {
+            $lightVariables[$variable] = $lightVariables['--link-color'];
+            $darkVariables[$variable] = $darkVariables['--link-color'];
+        }
 
         $this->lightColors = [
-            'accent' => $theme['light']['accent'],
-            'accent-content' => $theme['light']['accent-content'],
+            'accent' => $lightVariables['--accent'],
+            'accent-content' => $lightVariables['--accent-content'],
             'accent-foreground' => $theme['light']['accent-foreground'],
             'accent-background' => $pairingColor[50],
         ];
 
-        return <<<CSS
-            :root {
-                --accent: {$theme['light']['accent']};
-                --accent-content: {$theme['light']['accent-content']};
-                --accent-foreground: {$theme['light']['accent-foreground']};
-                --accent-background: {$pairingColor[50]};
-            }
+        return ':root {'."\n".$this->formatVariables($lightVariables)."\n}\n\n"
+            .':root[data-theme=dark] {'."\n".$this->formatVariables($darkVariables)."\n}";
+    }
 
-            @media(prefers-color-scheme: dark) {
-                :root {
-                    --accent: {$theme['dark']['accent']};
-                    --accent-content: {$theme['dark']['accent-content']};
-                    --accent-foreground: {$theme['dark']['accent-foreground']};
-                    --accent-background: {$pairingColor[900]};
-                }
-            }
-        CSS;
+    /**
+     * @param  array<string, array{accent: string, accent-content: string, accent-foreground: string}>  $theme
+     * @param  array<int, string>  $pairingColor
+     * @return array<string, array{light: string, dark: string}>
+     */
+    private function defaultColors(array $theme, array $pairingColor): array
+    {
+        return [
+            'background_color' => ['light' => $pairingColor[50], 'dark' => $pairingColor[900]],
+            'text_color' => ['light' => Color::Zinc[700], 'dark' => Color::Zinc[300]],
+            'banner_background_color' => ['light' => 'rgb(255 255 255 / 70%)', 'dark' => 'rgb(24 24 27 / 66%)'],
+            'background_fill_color' => ['light' => 'rgb(255 255 255 / 92%)', 'dark' => 'rgb(24 24 27 / 76%)'],
+            'error_color' => ['light' => Color::Red[600], 'dark' => Color::Red[600]],
+            'info_color' => ['light' => Color::Blue[600], 'dark' => Color::Blue[600]],
+            'success_color' => ['light' => Color::Green[600], 'dark' => Color::Green[600]],
+            'alert_color' => ['light' => Color::Amber[600], 'dark' => Color::Amber[600]],
+            'notice_color' => ['light' => Color::Orange[600], 'dark' => Color::Orange[600]],
+            'metrics_fill_color' => ['light' => $theme['light']['accent'], 'dark' => $theme['dark']['accent']],
+            'link_color' => ['light' => $theme['light']['accent-content'], 'dark' => $theme['dark']['accent-content']],
+        ];
+    }
+
+    private function color(?string $value, string $fallback): string
+    {
+        return is_string($value) && preg_match('/^#(?:[a-f0-9]{3}|[a-f0-9]{4}|[a-f0-9]{6}|[a-f0-9]{8})$/i', $value)
+            ? $value
+            : $fallback;
+    }
+
+    private function toHex(string $color): string
+    {
+        if (preg_match('/^rgba?\(\s*(\d+)\s+(\d+)\s+(\d+)(?:\s*\/\s*([\d.]+%?))?\s*\)$/i', $color, $matches)) {
+            $color = sprintf('#%02x%02x%02x', $matches[1], $matches[2], $matches[3]);
+        }
+
+        return Color::convertToHex($color);
+    }
+
+    /** @param array<string, string> $variables */
+    private function formatVariables(array $variables): string
+    {
+        $css = '';
+
+        foreach ($variables as $name => $value) {
+            $css .= "    {$name}: {$value};\n";
+        }
+
+        return rtrim($css);
     }
 
     /**
@@ -382,11 +195,17 @@ final class ThemeData extends BaseData
     }
 
     /**
-     * Match the pairing for the given accent, falling back to a neutral gray
-     * for accents Cachet has no explicit pairing for.
+     * @return array<string, string>
      */
-    public static function matchPairing(?string $accent): string
+    public function formDefaults(): array
     {
-        return self::THEME_PAIRINGS[$accent] ?? self::DEFAULT_PAIRING;
+        $defaults = [];
+
+        foreach ($this->formDefaults as $setting => $colors) {
+            $defaults[$setting] = $colors['light'];
+            $defaults[$setting.'_dark'] = $colors['dark'];
+        }
+
+        return $defaults;
     }
 }

@@ -1,9 +1,43 @@
 @use('Cachet\Cachet')
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="bg-accent-background text-zinc-700 dark:text-zinc-300">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <script>
+            (() => {
+                const root = document.documentElement
+                const preferenceKey = 'cachet-theme'
+                const media = window.matchMedia('(prefers-color-scheme: dark)')
+                let savedTheme = null
+
+                try {
+                    savedTheme = localStorage.getItem(preferenceKey)
+                } catch {}
+
+                const applyTheme = (theme) => {
+                    root.dataset.theme = theme
+                }
+
+                applyTheme(savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : (media.matches ? 'dark' : 'light'))
+
+                window.cachetSetTheme = (theme) => {
+                    const selectedTheme = theme === 'dark' ? 'dark' : 'light'
+                    savedTheme = selectedTheme
+                    try {
+                        localStorage.setItem(preferenceKey, selectedTheme)
+                    } catch {}
+                    applyTheme(selectedTheme)
+                }
+
+                media.addEventListener('change', (event) => {
+                    if (savedTheme !== 'light' && savedTheme !== 'dark') {
+                        applyTheme(event.matches ? 'dark' : 'light')
+                    }
+                })
+            })()
+        </script>
 
         @if ($favicon)
         <link rel="icon" href="{{ asset('vendor/cachethq/cachet/favicon.ico') }}" sizes="32x32" />

@@ -74,15 +74,5 @@ return [
     'manage_theme' => [
         'app_banner_label' => 'Banner na Imahe',
         'app_banner_helper' => 'Isang imahen na ipinapakita sa itaas ng status na pahina.',
-        'status_page_accent' => [
-            'heading' => 'Accent ng Status na Pahina',
-            'description' => 'I-customize ang accent na kulay ng iyong status na pahina. Maaaring awtomatikong pumili ang Cachet ng isang naaangkop na base na kulay.',
-            'accent_color_label' => 'Accent na Kulay',
-            'accent_color_helper' => 'Pangunahing kulay na ginagamit para sa mga heading, link, at aktibong estado.',
-            'accent_content_label' => 'Base na Kulay',
-            'accent_content_helper' => 'Neutral na base na kulay na ipinares sa accent. Hindi pinapagana kapag aktibo ang accent na pagtutugma.',
-            'accent_pairing_label' => 'Accent na Pagtutugma',
-            'accent_pairing_helper' => 'Awtomatikong pumili ng base na kulay na umaakma sa accent.',
-        ],
     ],
 ];

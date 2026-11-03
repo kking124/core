@@ -74,15 +74,5 @@ return [
     'manage_theme' => [
         'app_banner_label' => 'Bannerafbeelding',
         'app_banner_helper' => 'Een afbeelding die bovenaan de statuspagina wordt weergegeven.',
-        'status_page_accent' => [
-            'heading' => 'Statuspagina accent',
-            'description' => 'Pas de accentkleur van de statuspagina aan. Cachet kan automatisch een geschikte basiskleur selecteren.',
-            'accent_color_label' => 'Accentkleur',
-            'accent_color_helper' => 'Primaire kleur gebruikt voor koppen, links en actieve toestanden.',
-            'accent_content_label' => 'Basiskleur',
-            'accent_content_helper' => 'Neutrale basiskleur gekoppeld aan het accent. Uitgeschakeld wanneer accentkoppeling actief is.',
-            'accent_pairing_label' => 'Accentkoppeling',
-            'accent_pairing_helper' => 'Kies automatisch een basiskleur die bij het accent past.',
-        ],
     ],
 ];

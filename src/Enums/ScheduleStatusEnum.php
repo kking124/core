@@ -2,7 +2,7 @@
 
 namespace Cachet\Enums;
 
-use Filament\Support\Colors\Color;
+use Cachet\Data\Cachet\ThemeData;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
@@ -46,9 +46,9 @@ enum ScheduleStatusEnum: int implements HasColor, HasIcon, HasLabel
     public function getColor(): array
     {
         return match ($this) {
-            self::upcoming => Color::Blue,
-            self::in_progress => Color::Amber,
-            self::complete => Color::Green,
+            self::upcoming => ThemeData::statusPalette('info'),
+            self::in_progress => ThemeData::statusPalette('alert'),
+            self::complete => ThemeData::statusPalette('success'),
         };
     }
 

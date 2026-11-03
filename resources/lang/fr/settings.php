@@ -74,15 +74,5 @@ return [
     'manage_theme' => [
         'app_banner_label' => "Image de banni\u{00E8}re",
         'app_banner_helper' => "Une image affich\u{00E9}e en haut de la page de statut.",
-        'status_page_accent' => [
-            'heading' => 'Accent de la page de statut',
-            'description' => "Personnalisez la couleur d\u{2019}accentuation de votre page de statut. Cachet peut automatiquement s\u{00E9}lectionner une couleur de base assortie.",
-            'accent_color_label' => "Couleur d\u{2019}accentuation",
-            'accent_color_helper' => "Couleur principale utilis\u{00E9}e pour les titres, les liens et les \u{00E9}tats actifs.",
-            'accent_content_label' => 'Couleur de base',
-            'accent_content_helper' => "Couleur de base neutre associ\u{00E9}e \u{00E0} l\u{2019}accent. D\u{00E9}sactiv\u{00E9}e lorsque l\u{2019}association des couleurs est activ\u{00E9}e.",
-            'accent_pairing_label' => 'Association des couleurs',
-            'accent_pairing_helper' => "Choisit automatiquement une couleur de base qui compl\u{00E8}te l\u{2019}accent.",
-        ],
     ],
 ];

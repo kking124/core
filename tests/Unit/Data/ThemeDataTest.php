@@ -6,56 +6,47 @@ use Cachet\Data\Cachet\ThemeData;
 use Cachet\Settings\ThemeSettings;
 use Filament\Support\Colors\Color;
 
-/**
- * The accent select is built from Filament's palette minus the grays, so any
- * color Filament adds becomes selectable without Cachet knowing about it.
- */
-function selectableAccents(): array
-{
-    return collect(Color::all())
-        ->except(ThemeData::GRAYS)
-        ->keys()
-        ->push('cachet')
-        ->all();
-}
-
-it('compiles styles for every selectable accent', function () {
-    foreach (selectableAccents() as $accent) {
-        $settings = app(ThemeSettings::class)->fill([
-            'accent' => $accent,
-            'accent_content' => null,
-            'accent_pairing' => true,
-        ]);
-
-        expect((new ThemeData($settings))->styles)
-            ->toContain('--accent:', '--accent-background:');
-    }
-});
-
-it('pairs every selectable accent with a gray', function () {
-    foreach (selectableAccents() as $accent) {
-        expect(ThemeData::matchPairing($accent))->toBeIn(ThemeData::GRAYS);
-    }
-});
-
-it('compiles styles for every selectable accent content', function () {
-    foreach (ThemeData::GRAYS as $gray) {
-        $settings = app(ThemeSettings::class)->fill([
-            'accent' => 'cachet',
-            'accent_content' => $gray,
-            'accent_pairing' => false,
-        ]);
-
-        expect((new ThemeData($settings))->styles)->toContain('--accent-background:');
-    }
-});
-
-it('falls back to the cachet accent when the stored accent is unknown', function () {
+it('compiles custom light and dark status page colors', function () {
     $settings = app(ThemeSettings::class)->fill([
-        'accent' => 'not-a-real-color',
-        'accent_content' => null,
-        'accent_pairing' => true,
+        'background_color' => '#101820',
+        'text_color' => '#112233',
+        'text_color_dark' => '#d4d4d8',
+        'alert_color_dark' => '#abcdef',
     ]);
 
-    expect((new ThemeData($settings))->styles)->toContain('--accent:');
+    $styles = (new ThemeData($settings))->styles;
+    [$light, $dark] = explode(':root[data-theme=dark]', $styles);
+
+    expect($light)->toContain('--page-background-color: #101820', '--page-text-color: #112233')
+        ->and($dark)->toContain('--page-text-color: #d4d4d8', '--alert-color: #abcdef')
+        ->and($styles)->not->toContain('@media(prefers-color-scheme: dark)');
+});
+
+it('uses mode-specific defaults and keeps custom light surfaces out of dark mode', function () {
+    $settings = app(ThemeSettings::class)->fill([
+        'background_color' => '#101820',
+        'success_color' => '#123456',
+    ]);
+
+    $styles = (new ThemeData($settings))->styles;
+    [, $dark] = explode(':root[data-theme=dark]', $styles);
+
+    expect($dark)->toContain('--page-background-color: '.Color::Zinc[900])
+        ->and($dark)->toContain('--alert-color: '.Color::Amber[600])
+        ->and($dark)->toContain('--success-color: #123456')
+        ->and($dark)->toContain('--metrics-fill-color: '.Color::generateV3Palette('rgb(4, 193, 71)')[500]);
+});
+
+it('rejects invalid custom colors and exposes picker defaults', function () {
+    $settings = app(ThemeSettings::class)->fill([
+        'background_color' => 'red; } body { display: none',
+    ]);
+
+    $theme = new ThemeData($settings);
+
+    expect($theme->styles)->not->toContain('display: none')
+        ->and($theme->formDefaults())->toMatchArray([
+            'text_color' => '#3f3f46',
+            'text_color_dark' => '#d4d4d8',
+        ]);
 });

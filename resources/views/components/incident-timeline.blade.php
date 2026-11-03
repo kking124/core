@@ -1,11 +1,11 @@
 {{ \Cachet\Facades\CachetView::renderHook(\Cachet\View\RenderHook::STATUS_PAGE_INCIDENT_TIMELINE_BEFORE) }}
 <section data-component="incident-timeline" class="flex flex-col gap-4">
     <div data-slot="header" class="flex flex-col justify-between gap-3 md:flex-row md:items-center md:gap-0">
-        <h2 data-slot="title" class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+        <h2 data-slot="title" class="text-2xl font-semibold tracking-tight text-page ">
             {{ $recentIncidentsOnly ? __('cachet::incident.timeline.recent_incidents_header') : __('cachet::incident.timeline.past_incidents_header') }}
         </h2>
 
-        <fieldset data-slot="filters" aria-label="{{ __('cachet::incident.timeline.date_range_label') }}" class="grid grid-cols-2 gap-3 text-sm text-zinc-500 dark:text-zinc-400">
+        <fieldset data-slot="filters" aria-label="{{ __('cachet::incident.timeline.date_range_label') }}" class="grid grid-cols-2 gap-3 text-sm text-page/65 ">
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium">{{ __('cachet::incident.timeline.from_label') }}</span>
                 <x-filament::input.wrapper disabled>
@@ -43,7 +43,7 @@
         @forelse ($timeline as $date => $day)
             <x-cachet::incident :date="$date" :incidents="$day['incidents']" :schedules="$day['schedules']" />
         @empty
-            <p data-slot="empty" class="text-sm text-zinc-500 dark:text-zinc-400">
+            <p data-slot="empty" class="text-sm text-page/65 ">
                 {{ __('cachet::incident.timeline.no_incidents_reported_between', ['from' => $from, 'to' => $to]) }}
             </p>
         @endforelse
@@ -54,7 +54,7 @@
             <div class="inline-flex items-center gap-0.5 rounded-lg bg-zinc-100 p-0.5 ring-1 ring-zinc-900/10 dark:bg-zinc-800/80 dark:ring-white/15">
                 @if ($canPageBackward)
                     <a href="{{ route('cachet.status-page', ['from' => $nextPeriodFrom]) }}"
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-zinc-600 transition hover:bg-white hover:text-zinc-900 hover:shadow-sm hover:ring-1 hover:ring-zinc-900/10 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white dark:hover:ring-white/15">
+                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-page/80 transition hover:bg-white hover:text-page hover:shadow-sm hover:ring-1 hover:ring-zinc-900/10  dark:hover:bg-zinc-700 dark:hover:text-white dark:hover:ring-white/15">
                         <x-heroicon-m-chevron-left class="size-3.5" />
                         {{ __('cachet::incident.timeline.navigate.previous') }}
                     </a>
@@ -62,12 +62,12 @@
 
                 @if($canPageForward)
                     <a href="{{ route('cachet.status-page') }}"
-                        class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium text-zinc-600 transition hover:bg-white hover:text-zinc-900 hover:shadow-sm hover:ring-1 hover:ring-zinc-900/10 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white dark:hover:ring-white/15">
+                        class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium text-page/80 transition hover:bg-white hover:text-page hover:shadow-sm hover:ring-1 hover:ring-zinc-900/10  dark:hover:bg-zinc-700 dark:hover:text-white dark:hover:ring-white/15">
                         {{ __('cachet::incident.timeline.navigate.today') }}
                     </a>
 
                     <a href="{{ route('cachet.status-page', ['from' => $nextPeriodTo]) }}"
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-zinc-600 transition hover:bg-white hover:text-zinc-900 hover:shadow-sm hover:ring-1 hover:ring-zinc-900/10 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white dark:hover:ring-white/15">
+                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-page/80 transition hover:bg-white hover:text-page hover:shadow-sm hover:ring-1 hover:ring-zinc-900/10  dark:hover:bg-zinc-700 dark:hover:text-white dark:hover:ring-white/15">
                         {{ __('cachet::incident.timeline.navigate.next') }}
                         <x-heroicon-m-chevron-right class="size-3.5" />
                     </a>

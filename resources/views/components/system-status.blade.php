@@ -1,8 +1,8 @@
 {{ \Cachet\Facades\CachetView::renderHook(\Cachet\View\RenderHook::STATUS_PAGE_SYSTEM_STATUS_BEFORE) }}
 <section data-component="system-status" class="status-overview">
     <header class="status-overview__masthead">
-        <h2 data-slot="title" class="font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">{{ __('cachet::system_status.title') }}</h2>
-        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+        <h2 data-slot="title" class="font-semibold tracking-tight text-page ">{{ __('cachet::system_status.title') }}</h2>
+        <p class="text-sm text-page/65 ">
             <time datetime="{{ $from->toDateString() }}">{{ $from->format('M j') }}</time>
             <span aria-hidden="true">–</span>
             <time datetime="{{ $to->toDateString() }}">{{ $to->format('M j, Y') }}</time>
@@ -17,13 +17,13 @@
                     <div class="flex items-center justify-between gap-4">
                         <span class="flex min-w-0 items-center gap-2">
                             <span x-show="! $disclosure.isOpen" class="flex shrink-0">
-                                <x-heroicon-s-check-circle class="size-4 text-emerald-500" />
+                                <x-heroicon-s-check-circle class="size-4 text-status-success" />
                             </span>
-                            <span class="truncate font-semibold text-zinc-900 dark:text-zinc-100">{{ $group['model']->name }}</span>
-                            <x-heroicon-m-chevron-down ::class="$disclosure.isOpen && 'rotate-180'" class="size-3.5 shrink-0 text-zinc-400 transition" />
-                            <span class="hidden shrink-0 text-sm text-zinc-500 dark:text-zinc-400 lg:inline">{{ trans_choice('cachet::system_status.component_count', $group['components']->count(), ['count' => $group['components']->count()]) }}</span>
+                            <span class="truncate font-semibold text-page ">{{ $group['model']->name }}</span>
+                            <x-heroicon-m-chevron-down ::class="$disclosure.isOpen && 'rotate-180'" class="size-3.5 shrink-0 text-page/50 transition" />
+                            <span class="hidden shrink-0 text-sm text-page/65  lg:inline">{{ trans_choice('cachet::system_status.component_count', $group['components']->count(), ['count' => $group['components']->count()]) }}</span>
                         </span>
-                        <span x-show="! $disclosure.isOpen" class="hidden shrink-0 text-sm text-zinc-500 dark:text-zinc-400 lg:inline">{{ $group['uptime'] === null ? __('cachet::system_status.no_data') : __('cachet::system_status.uptime', ['uptime' => number_format($group['uptime'], 2)]) }}</span>
+                        <span x-show="! $disclosure.isOpen" class="hidden shrink-0 text-sm text-page/65  lg:inline">{{ $group['uptime'] === null ? __('cachet::system_status.no_data') : __('cachet::system_status.uptime', ['uptime' => number_format($group['uptime'], 2)]) }}</span>
                     </div>
                     <div data-slot="indicators" x-show="! $disclosure.isOpen" class="mt-3 hidden h-4 gap-0.5 lg:grid" style="grid-template-columns: repeat({{ $group['days']->count() }}, minmax(2px, 1fr))">
                         @foreach ($group['days'] as $date => $status)
@@ -45,7 +45,7 @@
                                         ])
                                         <x-cachet::system-status-component-name :model="$componentRow['model']" />
                                     </div>
-                                    <span class="hidden shrink-0 text-sm text-zinc-500 dark:text-zinc-400 lg:inline">{{ $componentRow['uptime'] === null ? __('cachet::system_status.no_data') : __('cachet::system_status.uptime', ['uptime' => number_format($componentRow['uptime'], 2)]) }}</span>
+                                    <span class="hidden shrink-0 text-sm text-page/65  lg:inline">{{ $componentRow['uptime'] === null ? __('cachet::system_status.no_data') : __('cachet::system_status.uptime', ['uptime' => number_format($componentRow['uptime'], 2)]) }}</span>
                                 </div>
                                 <div data-slot="indicators" class="mt-3 hidden h-4 gap-0.5 lg:grid" style="grid-template-columns: repeat({{ $componentRow['days']->count() }}, minmax(2px, 1fr))">
                                     @foreach ($componentRow['days'] as $date => $status)
@@ -72,7 +72,7 @@
                         ])
                         <x-cachet::system-status-component-name :model="$componentRow['model']" emphasized />
                     </div>
-                    <span class="hidden shrink-0 text-sm text-zinc-500 dark:text-zinc-400 lg:inline">{{ $componentRow['uptime'] === null ? __('cachet::system_status.no_data') : __('cachet::system_status.uptime', ['uptime' => number_format($componentRow['uptime'], 2)]) }}</span>
+                    <span class="hidden shrink-0 text-sm text-page/65  lg:inline">{{ $componentRow['uptime'] === null ? __('cachet::system_status.no_data') : __('cachet::system_status.uptime', ['uptime' => number_format($componentRow['uptime'], 2)]) }}</span>
                 </div>
                 <div data-slot="indicators" class="mt-3 hidden h-4 gap-0.5 lg:grid" style="grid-template-columns: repeat({{ $componentRow['days']->count() }}, minmax(2px, 1fr))">
                     @foreach ($componentRow['days'] as $date => $status)

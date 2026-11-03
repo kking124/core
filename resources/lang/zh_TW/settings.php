@@ -74,15 +74,5 @@ return [
     'manage_theme' => [
         'app_banner_label' => '橫幅圖像',
         'app_banner_helper' => '顯示在狀態頁面頂部的圖像。',
-        'status_page_accent' => [
-            'heading' => '狀態頁面強調色',
-            'description' => '自定義狀態頁面的強調色。Cachet 可以自動選擇匹配的基礎色。',
-            'accent_color_label' => '強調色',
-            'accent_color_helper' => '用於標題、連結和活動狀態的主要顏色。',
-            'accent_content_label' => '基礎色',
-            'accent_content_helper' => '與強調色搭配的中性基礎色。當強調色配對啟用時停用。',
-            'accent_pairing_label' => '強調色配對',
-            'accent_pairing_helper' => '自動選擇與強調色相配的基礎色。',
-        ],
     ],
 ];
