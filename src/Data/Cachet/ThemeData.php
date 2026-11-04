@@ -299,11 +299,17 @@ final class ThemeData extends BaseData
         ];
     }
 
+    /**
+     * Whether the value is a 3, 4, 6, or 8 digit hex color such as #1a2b3c.
+     */
+    public static function isHexColor(mixed $value): bool
+    {
+        return is_string($value) && preg_match('/^#(?:[a-f0-9]{3}|[a-f0-9]{4}|[a-f0-9]{6}|[a-f0-9]{8})$/i', $value) === 1;
+    }
+
     private function color(?string $value, string $fallback): string
     {
-        return is_string($value) && preg_match('/^#(?:[a-f0-9]{3}|[a-f0-9]{4}|[a-f0-9]{6}|[a-f0-9]{8})$/i', $value)
-            ? $value
-            : $fallback;
+        return self::isHexColor($value) ? $value : $fallback;
     }
 
     private static function toHex(string $color): string

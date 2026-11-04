@@ -5,12 +5,15 @@ namespace Cachet\Filament\Pages\Settings;
 use Cachet\Cachet;
 use Cachet\Data\Cachet\ThemeData;
 use Cachet\Settings\ThemeSettings;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -65,8 +68,9 @@ class ManageTheme extends SettingsPage
     public function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(4)
             ->components([
-                Section::make(__('cachet::settings.manage_theme.app_banner_label'))->columns(2)->schema([
+                Section::make(__('cachet::settings.manage_theme.app_banner_label'))->columns(2)->columnSpan(3)->schema([
                     FileUpload::make('app_banner')
                         ->acceptedFileTypes((array) config('cachet.uploads.image_mime_types'))
                         ->maxSize((int) config('cachet.uploads.max_size'))
@@ -85,9 +89,19 @@ class ManageTheme extends SettingsPage
                         ->label(__('cachet::settings.manage_theme.banner_padding')),
                 ]),
 
+                Section::make(__('cachet::settings.manage_theme.branding_io.heading'))
+                    ->description(__('cachet::settings.manage_theme.branding_io.description'))
+                    ->columnSpan(1)
+                    ->schema([
+                        Actions::make([$this->exportAction(), $this->importAction()])
+                            ->key('branding-io')
+                            ->fullWidth(),
+                    ]),
+
                 Section::make(__('cachet::settings.manage_theme.branding.heading'))
                     ->description(__('cachet::settings.manage_theme.branding.description'))
                     ->columns(2)
+                    ->columnSpanFull()
                     ->schema([
                         Select::make('branding_color')
                             ->label(__('cachet::settings.manage_theme.branding.color_label'))
@@ -145,12 +159,14 @@ class ManageTheme extends SettingsPage
                 Section::make(__('cachet::settings.manage_theme.status_page_colors.heading'))
                     ->description(__('cachet::settings.manage_theme.status_page_colors.description'))
                     ->columns(2)
+                    ->columnSpanFull()
                     ->collapsible()
                     ->schema(self::colorPickers()),
 
                 Section::make(__('cachet::settings.manage_theme.status_page_colors.dark_heading'))
                     ->description(__('cachet::settings.manage_theme.status_page_colors.dark_description'))
                     ->columns(2)
+                    ->columnSpanFull()
                     ->collapsed()
                     ->schema(self::colorPickers('_dark')),
             ]);
@@ -177,6 +193,17 @@ class ManageTheme extends SettingsPage
             $data[$name] ??= $default;
         }
 
+        return $this->withBrandingControls($data);
+    }
+
+    /**
+     * Derive the branding controls from the stored colors.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function withBrandingControls(array $data): array
+    {
         $branding = ThemeData::matchBranding(Arr::only($data, self::BRANDING_FIELDS));
         $base = ThemeData::matchBase(Arr::only($data, self::BASE_FIELDS));
         $data['branding_color'] = $branding;
@@ -277,5 +304,78 @@ class ManageTheme extends SettingsPage
     private function themeDefaults(): array
     {
         return (new ThemeData(app(ThemeSettings::class)))->pristineDefaults();
+    }
+
+    private function exportAction(): Action
+    {
+        return Action::make('exportBranding')
+            ->label(__('cachet::settings.manage_theme.branding_io.export_label'))
+            ->icon('heroicon-o-arrow-down-tray')
+            ->color('gray')
+            ->action(fn () => response()->streamDownload(
+                fn () => print json_encode(
+                    Arr::only($this->form->getRawState(), $this->colorFields()),
+                    JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES,
+                ),
+                'branding-colors.json',
+                ['Content-Type' => 'application/json'],
+            ));
+    }
+
+    private function importAction(): Action
+    {
+        return Action::make('importBranding')
+            ->label(__('cachet::settings.manage_theme.branding_io.import_label'))
+            ->icon('heroicon-o-arrow-up-tray')
+            ->color('gray')
+            ->modalHeading(__('cachet::settings.manage_theme.branding_io.import_label'))
+            ->modalSubmitActionLabel(__('cachet::settings.manage_theme.branding_io.import_label'))
+            ->schema([
+                FileUpload::make('file')
+                    ->label(__('cachet::settings.manage_theme.branding_io.file_label'))
+                    ->helperText(__('cachet::settings.manage_theme.branding_io.file_helper'))
+                    ->acceptedFileTypes(['application/json', 'text/plain'])
+                    ->maxSize(64)
+                    ->storeFiles(false)
+                    ->required(),
+            ])
+            ->action(function (array $data): void {
+                $colors = $this->parseColors((string) $data['file']->get());
+
+                if ($colors === []) {
+                    Notification::make()->danger()->title(__('cachet::settings.manage_theme.branding_io.import_failed'))->send();
+
+                    return;
+                }
+
+                $this->form->fill($this->withBrandingControls([...$this->form->getRawState(), ...$colors]));
+
+                Notification::make()->success()->title(__('cachet::settings.manage_theme.branding_io.imported'))->send();
+            });
+    }
+
+    /**
+     * The recognised, valid hex colors in a branding JSON document.
+     *
+     * @return array<string, string>
+     */
+    private function parseColors(string $json): array
+    {
+        $decoded = json_decode($json, true);
+
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        return array_filter(
+            Arr::only($decoded, $this->colorFields()),
+            fn (mixed $color): bool => ThemeData::isHexColor($color),
+        );
+    }
+
+    /** @return array<int, string> */
+    private function colorFields(): array
+    {
+        return array_merge(self::COLOR_SETTINGS, array_map(fn (string $name): string => $name.'_dark', self::COLOR_SETTINGS));
     }
 }

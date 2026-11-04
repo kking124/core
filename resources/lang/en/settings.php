@@ -132,6 +132,16 @@ return [
         'notice_color' => 'Notice color',
         'metrics_fill_color' => 'Metrics fill color',
         'link_color' => 'Link color',
+        'branding_io' => [
+            'heading' => 'Import / export',
+            'description' => 'Share your branding colors as a JSON file.',
+            'export_label' => 'Export colors',
+            'import_label' => 'Import colors',
+            'file_label' => 'Branding JSON file',
+            'file_helper' => 'Imported colors fill the form below. Save to apply them.',
+            'imported' => 'Colors imported. Review them and save to apply.',
+            'import_failed' => 'No valid branding colors were found in that file.',
+        ],
         'branding' => [
             'heading' => 'Branding',
             'description' => 'Pick the brand color used for links and metric charts. Cachet can automatically select a matching base color.',

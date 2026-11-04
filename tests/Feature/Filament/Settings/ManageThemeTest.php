@@ -5,6 +5,7 @@ namespace Tests\Feature\Filament\Settings;
 use Cachet\Data\Cachet\ThemeData;
 use Cachet\Filament\Pages\Settings\ManageTheme;
 use Cachet\Settings\ThemeSettings;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ColorPicker;
@@ -256,3 +257,82 @@ it('does not persist the branding form controls', function () {
 
     expect(DB::table('settings')->where('group', 'theme')->whereIn('name', ['branding_color', 'branding_base', 'branding_pairing', 'customize_branding'])->exists())->toBeFalse();
 });
+
+function brandingAction(string $name): TestAction
+{
+    return TestAction::make($name)->schemaComponent('branding-io');
+}
+
+function brandingFile(array|string $contents): UploadedFile
+{
+    return UploadedFile::fake()->createWithContent('branding.json', is_array($contents) ? json_encode($contents) : $contents);
+}
+
+it('exports the branding colors as a json download', function () {
+    $component = livewire(ManageTheme::class)
+        ->set('data.customize_branding', true)
+        ->set('data.text_color', '#112233')
+        ->set('data.link_color_dark', '#aabbcc')
+        ->callAction(brandingAction('exportBranding'))
+        ->assertFileDownloaded('branding-colors.json');
+
+    $exported = json_decode(base64_decode(data_get($component->effects, 'download.content')), true);
+
+    expect($exported)->toHaveCount(22)
+        ->and($exported['text_color'])->toBe('#112233')
+        ->and($exported['link_color_dark'])->toBe('#aabbcc')
+        ->and($exported)->not->toHaveKeys(['banner_padding', 'branding_color', 'customize_branding']);
+});
+
+it('imports branding colors into the form without saving them', function () {
+    livewire(ManageTheme::class)
+        ->callAction(brandingAction('importBranding'), ['file' => brandingFile([
+            'text_color' => '#112233',
+            'error_color_dark' => '#abcdef',
+        ])])
+        ->assertHasNoFormErrors()
+        ->assertSet('data.text_color', '#112233')
+        ->assertSet('data.error_color_dark', '#abcdef')
+        ->assertSet('data.customize_branding', true);
+
+    expect(app(ThemeSettings::class)->text_color)->toBeNull();
+});
+
+it('round trips an export through an import', function () {
+    $exported = base64_decode(data_get(
+        livewire(ManageTheme::class)
+            ->set('data.customize_branding', true)
+            ->set('data.success_color', '#123456')
+            ->callAction(brandingAction('exportBranding'))
+            ->effects,
+        'download.content',
+    ));
+
+    livewire(ManageTheme::class)
+        ->callAction(brandingAction('importBranding'), ['file' => brandingFile($exported)])
+        ->assertSet('data.success_color', '#123456');
+});
+
+it('ignores unknown keys and invalid colors on import', function () {
+    livewire(ManageTheme::class)
+        ->callAction(brandingAction('importBranding'), ['file' => brandingFile([
+            'text_color' => 'red; } body { display: none',
+            'banner_padding' => 999,
+            'not_a_color' => '#112233',
+            'link_color' => '#112233',
+        ])])
+        ->assertSet('data.link_color', '#112233')
+        ->assertSet('data.text_color', '#3f3f46')
+        ->assertSet('data.banner_padding', null);
+});
+
+it('rejects an import with no valid colors', function (string $contents) {
+    livewire(ManageTheme::class)
+        ->callAction(brandingAction('importBranding'), ['file' => brandingFile($contents)])
+        ->assertNotified(__('cachet::settings.manage_theme.branding_io.import_failed'))
+        ->assertSet('data.customize_branding', false);
+})->with([
+    'not json' => 'not json',
+    'not an object' => '"#112233"',
+    'no known colors' => '{"banner_padding": 10}',
+]);
