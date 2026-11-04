@@ -152,7 +152,12 @@ class ManageTheme extends SettingsPage
                             ->afterStateUpdated(function (Get $get, Set $set, bool $state): void {
                                 if (! $state) {
                                     $this->resetColors($get, $set);
+
+                                    return;
                                 }
+
+                                $this->dispatch('open-section', id: 'light-colors');
+                                $this->dispatch('open-section', id: 'dark-colors');
                             }),
                     ]),
 
@@ -160,14 +165,16 @@ class ManageTheme extends SettingsPage
                     ->description(__('cachet::settings.manage_theme.status_page_colors.description'))
                     ->columns(2)
                     ->columnSpanFull()
-                    ->collapsible()
+                    ->id('light-colors')
+                    ->collapsed(fn (Get $get): bool => ! $get('customize_branding'))
                     ->schema(self::colorPickers()),
 
                 Section::make(__('cachet::settings.manage_theme.status_page_colors.dark_heading'))
                     ->description(__('cachet::settings.manage_theme.status_page_colors.dark_description'))
                     ->columns(2)
                     ->columnSpanFull()
-                    ->collapsed()
+                    ->id('dark-colors')
+                    ->collapsed(fn (Get $get): bool => ! $get('customize_branding'))
                     ->schema(self::colorPickers('_dark')),
             ]);
     }

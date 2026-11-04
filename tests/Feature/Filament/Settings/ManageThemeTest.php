@@ -12,9 +12,11 @@ use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Features\SupportTesting\Testable;
 use Workbench\App\User;
 
 use function Pest\Laravel\actingAs;
@@ -336,3 +338,44 @@ it('rejects an import with no valid colors', function (string $contents) {
     'not an object' => '"#112233"',
     'no known colors' => '{"banner_padding": 10}',
 ]);
+
+function colorSectionCollapsed(Testable $component, string $id): bool
+{
+    $section = collect($component->instance()->form->getComponents())
+        ->first(fn ($candidate): bool => $candidate instanceof Section && $candidate->getId() === $id);
+
+    return $section->isCollapsed();
+}
+
+it('collapses the light and dark color sections by default', function () {
+    $component = livewire(ManageTheme::class);
+
+    expect(colorSectionCollapsed($component, 'light-colors'))->toBeTrue()
+        ->and(colorSectionCollapsed($component, 'dark-colors'))->toBeTrue();
+});
+
+it('opens both color sections when customizing is turned on', function () {
+    livewire(ManageTheme::class)
+        ->set('data.customize_branding', true)
+        ->assertDispatched('open-section', id: 'light-colors')
+        ->assertDispatched('open-section', id: 'dark-colors');
+});
+
+it('does not open the color sections when customizing is turned off', function () {
+    livewire(ManageTheme::class)
+        ->set('data.customize_branding', true)
+        ->set('data.customize_branding', false)
+        ->assertNotDispatched('open-section');
+});
+
+it('opens both color sections on load when colors are customized', function () {
+    livewire(ManageTheme::class)
+        ->set('data.customize_branding', true)
+        ->set('data.error_color', '#112233')
+        ->call('save');
+
+    $component = livewire(ManageTheme::class);
+
+    expect(colorSectionCollapsed($component, 'light-colors'))->toBeFalse()
+        ->and(colorSectionCollapsed($component, 'dark-colors'))->toBeFalse();
+});

@@ -155,9 +155,9 @@ return [
             'customize_helper' => 'Edit every light and dark mode color below. When off, they follow the controls above.',
         ],
         'status_page_colors' => [
-            'heading' => 'Status page branding (light mode)',
+            'heading' => 'Light Mode Branding',
             'description' => 'Used when a visitor\'s device is in light mode. Empty fields use Cachet\'s light defaults.',
-            'dark_heading' => 'Status page branding (dark mode)',
+            'dark_heading' => 'Dark Mode Branding',
             'dark_description' => 'Used when a visitor\'s device is in dark mode. Empty fields use Cachet\'s dark defaults.',
         ],
     ],
