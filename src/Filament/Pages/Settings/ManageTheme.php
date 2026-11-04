@@ -5,11 +5,18 @@ namespace Cachet\Filament\Pages\Settings;
 use Cachet\Cachet;
 use Cachet\Data\Cachet\ThemeData;
 use Cachet\Settings\ThemeSettings;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Colors\Color;
+use Illuminate\Support\Arr;
 
 class ManageTheme extends SettingsPage
 {
@@ -28,6 +35,17 @@ class ManageTheme extends SettingsPage
         'metrics_fill_color',
         'link_color',
     ];
+
+    private const BRANDING_FIELDS = [
+        'link_color',
+        'link_color_dark',
+        'metrics_fill_color',
+        'metrics_fill_color_dark',
+    ];
+
+    private const BASE_FIELDS = ['background_color', 'background_color_dark'];
+
+    private const BRANDING_CONTROLS = ['branding_color', 'branding_base', 'branding_pairing', 'customize_branding'];
 
     public static function canAccess(): bool
     {
@@ -67,6 +85,63 @@ class ManageTheme extends SettingsPage
                         ->label(__('cachet::settings.manage_theme.banner_padding')),
                 ]),
 
+                Section::make(__('cachet::settings.manage_theme.branding.heading'))
+                    ->description(__('cachet::settings.manage_theme.branding.description'))
+                    ->columns(2)
+                    ->schema([
+                        Select::make('branding_color')
+                            ->label(__('cachet::settings.manage_theme.branding.color_label'))
+                            ->helperText(__('cachet::settings.manage_theme.branding.color_helper'))
+                            ->options(fn (): array => self::swatchOptions(array_map(
+                                fn (array $colors): string => $colors['metrics_fill_color'],
+                                ThemeData::brandingPresets(),
+                            )))
+                            ->native(false)
+                            ->allowHtml()
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set, ?string $state): void {
+                                $this->applyColors($set, ThemeData::brandingPresets()[$state] ?? []);
+
+                                if ($get('branding_pairing')) {
+                                    $this->pairBase($set, $state);
+                                }
+                            }),
+
+                        Select::make('branding_base')
+                            ->label(__('cachet::settings.manage_theme.branding.base_label'))
+                            ->helperText(__('cachet::settings.manage_theme.branding.base_helper'))
+                            ->options(fn (): array => self::swatchOptions(array_map(
+                                fn (string $gray): string => Color::all()[$gray][400],
+                                array_combine(ThemeData::GRAYS, ThemeData::GRAYS),
+                            )))
+                            ->native(false)
+                            ->allowHtml()
+                            ->live()
+                            ->disabled(fn (Get $get): bool => $get('branding_pairing') === true)
+                            ->dehydrated(false)
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => $this->applyColors($set, ThemeData::brandingBases()[$state] ?? [])),
+
+                        Toggle::make('branding_pairing')
+                            ->label(__('cachet::settings.manage_theme.branding.pairing_label'))
+                            ->helperText(__('cachet::settings.manage_theme.branding.pairing_helper'))
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set, bool $state): void {
+                                if ($state) {
+                                    $this->pairBase($set, $get('branding_color'));
+                                }
+                            }),
+
+                        Checkbox::make('customize_branding')
+                            ->label(__('cachet::settings.manage_theme.branding.customize_label'))
+                            ->helperText(__('cachet::settings.manage_theme.branding.customize_helper'))
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set, bool $state): void {
+                                if (! $state) {
+                                    $this->resetColors($get, $set);
+                                }
+                            }),
+                    ]),
+
                 Section::make(__('cachet::settings.manage_theme.status_page_colors.heading'))
                     ->description(__('cachet::settings.manage_theme.status_page_colors.description'))
                     ->columns(2)
@@ -84,9 +159,14 @@ class ManageTheme extends SettingsPage
     /** @return array<ColorPicker> */
     private static function colorPickers(string $suffix = ''): array
     {
-        return array_map(fn (string $name): ColorPicker => ColorPicker::make($name.$suffix)
-            ->format('hex')
-            ->label(__('cachet::settings.manage_theme.'.$name)), self::COLOR_SETTINGS);
+        return array_map(function (string $name) use ($suffix): ColorPicker {
+            // Colors follow the branding controls unless the user customizes them.
+            return ColorPicker::make($name.$suffix)
+                ->format('hex')
+                ->label(__('cachet::settings.manage_theme.'.$name))
+                ->disabled(fn (Get $get): bool => ! $get('customize_branding'))
+                ->dehydrated();
+        }, self::COLOR_SETTINGS);
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
@@ -97,11 +177,20 @@ class ManageTheme extends SettingsPage
             $data[$name] ??= $default;
         }
 
+        $branding = ThemeData::matchBranding(Arr::only($data, self::BRANDING_FIELDS));
+        $base = ThemeData::matchBase(Arr::only($data, self::BASE_FIELDS));
+        $data['branding_color'] = $branding;
+        $data['branding_base'] = $base;
+        $data['branding_pairing'] = $branding !== null && $base === ThemeData::matchPairing($branding);
+        $data['customize_branding'] = $branding === null || $base === null || $this->hasOverrides($data);
+
         return $data;
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        $data = Arr::except($data, self::BRANDING_CONTROLS);
+
         foreach ($this->formDefaults() as $name => $default) {
             if (isset($data[$name]) && strtolower((string) $data[$name]) === $default) {
                 $data[$name] = null;
@@ -115,5 +204,78 @@ class ManageTheme extends SettingsPage
     private function formDefaults(): array
     {
         return (new ThemeData(app(ThemeSettings::class)))->formDefaults();
+    }
+
+    /**
+     * @param  array<string, string>  $options  Swatch color keyed by option name.
+     * @return array<string, string>
+     */
+    private static function swatchOptions(array $options): array
+    {
+        return collect($options)
+            ->map(fn (string $swatch, string $name): string => '<div class="flex items-center"><div class="theme-swatch" style="--swatch: '.e($swatch).'"></div><div>'.e(__(ucwords($name))).'</div></div>')
+            ->all();
+    }
+
+    /**
+     * @param  array<string, string>  $colors
+     */
+    private function applyColors(Set $set, array $colors): void
+    {
+        foreach ($colors as $field => $color) {
+            $set($field, $color);
+        }
+    }
+
+    private function pairBase(Set $set, ?string $branding): void
+    {
+        $base = ThemeData::matchPairing($branding);
+
+        $set('branding_base', $base);
+        $this->applyColors($set, ThemeData::brandingBases()[$base]);
+    }
+
+    /**
+     * Put every color back to what the branding controls produce.
+     */
+    private function resetColors(Get $get, Set $set): void
+    {
+        $branding = $get('branding_color') ?? 'cachet';
+
+        $set('branding_color', $branding);
+        $this->applyColors($set, $this->themeDefaults());
+        $this->applyColors($set, ThemeData::brandingPresets()[$branding]);
+
+        if ($get('branding_pairing') || $get('branding_base') === null) {
+            $this->pairBase($set, $branding);
+
+            return;
+        }
+
+        $this->applyColors($set, ThemeData::brandingBases()[$get('branding_base')]);
+    }
+
+    /**
+     * Whether any color outside the branding and base colors differs from its default.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function hasOverrides(array $data): bool
+    {
+        $controlled = [...self::BRANDING_FIELDS, ...self::BASE_FIELDS];
+
+        foreach (Arr::except($this->themeDefaults(), $controlled) as $name => $default) {
+            if (strtolower((string) ($data[$name] ?? $default)) !== strtolower($default)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** @return array<string, string> */
+    private function themeDefaults(): array
+    {
+        return (new ThemeData(app(ThemeSettings::class)))->pristineDefaults();
     }
 }

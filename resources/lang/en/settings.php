@@ -132,6 +132,18 @@ return [
         'notice_color' => 'Notice color',
         'metrics_fill_color' => 'Metrics fill color',
         'link_color' => 'Link color',
+        'branding' => [
+            'heading' => 'Branding',
+            'description' => 'Pick the brand color used for links and metric charts. Cachet can automatically select a matching base color.',
+            'color_label' => 'Brand color',
+            'color_helper' => 'Primary color used for links and metric charts.',
+            'base_label' => 'Base color',
+            'base_helper' => 'Neutral base color paired with the brand color. Disabled when brand pairing is on.',
+            'pairing_label' => 'Brand pairing',
+            'pairing_helper' => 'Automatically pick a base color that complements the brand color.',
+            'customize_label' => 'Customize brand colors',
+            'customize_helper' => 'Edit every light and dark mode color below. When off, they follow the controls above.',
+        ],
         'status_page_colors' => [
             'heading' => 'Status page branding (light mode)',
             'description' => 'Used when a visitor\'s device is in light mode. Empty fields use Cachet\'s light defaults.',

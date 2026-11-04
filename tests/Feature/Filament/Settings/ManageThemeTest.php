@@ -2,12 +2,17 @@
 
 namespace Tests\Feature\Filament\Settings;
 
+use Cachet\Data\Cachet\ThemeData;
 use Cachet\Filament\Pages\Settings\ManageTheme;
 use Cachet\Settings\ThemeSettings;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Workbench\App\User;
 
@@ -109,4 +114,145 @@ it('stores unchanged default colors as null and persists changed colors', functi
     expect($settings->text_color)->toBe('#112233')
         ->and($settings->text_color_dark)->toBe('#aabbcc')
         ->and($settings->banner_padding)->toBe(24);
+});
+
+it('locks every light and dark color until customizing is enabled', function () {
+    $component = livewire(ManageTheme::class)
+        ->assertFormFieldExists('branding_color', fn (Select $field): bool => ! $field->isDisabled())
+        ->assertFormFieldExists('branding_base', fn (Select $field): bool => $field->isDisabled())
+        ->assertFormFieldExists('branding_pairing', fn (Toggle $field): bool => ! $field->isDisabled())
+        ->assertFormFieldExists('customize_branding', fn (Checkbox $field): bool => ! $field->isDisabled())
+        ->assertSet('data.customize_branding', false)
+        ->assertSet('data.branding_color', 'cachet')
+        ->assertSet('data.branding_base', 'zinc')
+        ->assertSet('data.branding_pairing', true);
+
+    foreach (['text_color', 'link_color_dark', 'error_color', 'background_color_dark'] as $name) {
+        $component->assertFormFieldExists($name, fn (ColorPicker $field): bool => $field->isDisabled());
+    }
+
+    $component->set('data.customize_branding', true);
+
+    foreach (['text_color', 'link_color_dark', 'error_color', 'background_color_dark'] as $name) {
+        $component->assertFormFieldExists($name, fn (ColorPicker $field): bool => ! $field->isDisabled());
+    }
+});
+
+it('places the customize checkbox after the original branding controls', function () {
+    $names = collect(livewire(ManageTheme::class)->instance()->form->getFlatComponents())
+        ->map(fn ($component) => method_exists($component, 'getName') ? $component->getName() : null)
+        ->filter(fn ($name) => in_array($name, ['branding_color', 'branding_base', 'branding_pairing', 'customize_branding'], true))
+        ->values()
+        ->all();
+
+    expect($names)->toBe(['branding_color', 'branding_base', 'branding_pairing', 'customize_branding']);
+});
+
+it('pairs the base color with the brand color while pairing is on', function () {
+    $slate = ThemeData::brandingBases()['slate'];
+
+    livewire(ManageTheme::class)
+        ->set('data.branding_color', 'blue')
+        ->assertSet('data.branding_base', 'slate')
+        ->assertSet('data.background_color', $slate['background_color'])
+        ->assertSet('data.background_color_dark', $slate['background_color_dark'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(ThemeSettings::class)->background_color)->toBe($slate['background_color']);
+});
+
+it('lets the base color be chosen when pairing is off', function () {
+    $stone = ThemeData::brandingBases()['stone'];
+
+    livewire(ManageTheme::class)
+        ->set('data.branding_pairing', false)
+        ->assertFormFieldExists('branding_base', fn (Select $field): bool => ! $field->isDisabled())
+        ->set('data.branding_base', 'stone')
+        ->set('data.branding_color', 'blue')
+        ->assertSet('data.branding_base', 'stone')
+        ->assertSet('data.background_color', $stone['background_color']);
+});
+
+it('sets the brand colors from the selected branding color', function () {
+    $blue = ThemeData::brandingPresets()['blue'];
+
+    livewire(ManageTheme::class)
+        ->set('data.branding_color', 'blue')
+        ->assertSet('data.link_color', $blue['link_color'])
+        ->assertSet('data.link_color_dark', $blue['link_color_dark'])
+        ->assertSet('data.metrics_fill_color', $blue['metrics_fill_color'])
+        ->assertSet('data.metrics_fill_color_dark', $blue['metrics_fill_color_dark'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $settings = app(ThemeSettings::class);
+
+    expect($settings->link_color)->toBe($blue['link_color'])
+        ->and($settings->metrics_fill_color_dark)->toBe($blue['metrics_fill_color_dark'])
+        ->and((new ThemeData($settings))->styles)->toContain('--link-color: '.$blue['link_color']);
+});
+
+it('stores the default branding color as no override', function () {
+    livewire(ManageTheme::class)
+        ->set('data.branding_color', 'blue')
+        ->call('save')
+        ->set('data.branding_color', 'cachet')
+        ->call('save');
+
+    $settings = app(ThemeSettings::class);
+
+    expect($settings->link_color)->toBeNull()
+        ->and($settings->metrics_fill_color)->toBeNull();
+});
+
+it('saves customized brand colors and reopens in customize mode', function () {
+    livewire(ManageTheme::class)
+        ->set('data.customize_branding', true)
+        ->fillForm(['link_color' => '#112233', 'metrics_fill_color_dark' => '#aabbcc'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(ThemeSettings::class)->link_color)->toBe('#112233');
+
+    livewire(ManageTheme::class)
+        ->assertSet('data.customize_branding', true)
+        ->assertSet('data.branding_color', null);
+});
+
+it('restores the selected branding color when customizing is turned off', function () {
+    $green = ThemeData::brandingPresets()['green'];
+
+    livewire(ManageTheme::class)
+        ->set('data.branding_color', 'green')
+        ->set('data.customize_branding', true)
+        ->set('data.link_color', '#112233')
+        ->set('data.customize_branding', false)
+        ->assertSet('data.link_color', $green['link_color']);
+});
+
+it('resets every color to the branding defaults when customizing is turned off', function () {
+    livewire(ManageTheme::class)
+        ->set('data.customize_branding', true)
+        ->set('data.text_color', '#112233')
+        ->set('data.customize_branding', false)
+        ->assertSet('data.text_color', '#3f3f46');
+});
+
+it('reopens in customize mode when a non-brand color is overridden', function () {
+    livewire(ManageTheme::class)
+        ->set('data.customize_branding', true)
+        ->set('data.error_color', '#112233')
+        ->call('save');
+
+    livewire(ManageTheme::class)
+        ->assertSet('data.customize_branding', true);
+});
+
+it('does not persist the branding form controls', function () {
+    livewire(ManageTheme::class)
+        ->set('data.branding_color', 'blue')
+        ->call('save');
+
+    expect(DB::table('settings')->where('group', 'theme')->whereIn('name', ['branding_color', 'branding_base', 'branding_pairing', 'customize_branding'])->exists())->toBeFalse();
 });

@@ -11,6 +11,31 @@ use Spatie\LaravelData\Attributes\Validation\Required;
 
 final class ThemeData extends BaseData
 {
+    public const GRAYS = ['slate', 'gray', 'zinc', 'neutral', 'stone', 'mauve', 'olive', 'mist', 'taupe'];
+
+    private const DEFAULT_PAIRING = 'zinc';
+
+    private const THEME_PAIRINGS = [
+        'cachet' => 'zinc',
+        'red' => 'zinc',
+        'orange' => 'neutral',
+        'amber' => 'neutral',
+        'yellow' => 'stone',
+        'lime' => 'zinc',
+        'green' => 'zinc',
+        'emerald' => 'zinc',
+        'teal' => 'gray',
+        'cyan' => 'gray',
+        'sky' => 'gray',
+        'blue' => 'slate',
+        'indigo' => 'slate',
+        'violet' => 'gray',
+        'purple' => 'gray',
+        'fuchsia' => 'zinc',
+        'pink' => 'zinc',
+        'rose' => 'zinc',
+    ];
+
     private const STATUS_FALLBACKS = [
         'success' => Color::Green[600],
         'info' => Color::Blue[600],
@@ -18,6 +43,119 @@ final class ThemeData extends BaseData
         'error' => Color::Red[600],
         'notice' => Color::Orange[600],
     ];
+
+    /**
+     * Palette shades of each named branding color: [light metrics, light link, dark metrics, dark link].
+     */
+    private const BRANDING_SHADES = [
+        'red' => [500, 600, 500, 400],
+        'orange' => [500, 600, 400, 400],
+        'amber' => [400, 600, 400, 400],
+        'yellow' => [400, 600, 400, 400],
+        'lime' => [400, 600, 400, 400],
+        'green' => [600, 600, 600, 400],
+        'emerald' => [600, 600, 600, 400],
+        'teal' => [600, 600, 600, 400],
+        'cyan' => [600, 600, 600, 400],
+        'sky' => [600, 600, 600, 400],
+        'blue' => [500, 600, 500, 400],
+        'indigo' => [500, 600, 500, 300],
+        'violet' => [500, 600, 500, 400],
+        'purple' => [500, 600, 500, 300],
+        'fuchsia' => [600, 600, 600, 400],
+        'pink' => [600, 600, 600, 400],
+        'rose' => [500, 500, 500, 400],
+    ];
+
+    /**
+     * Brand colors, light and dark, for each named branding color.
+     *
+     * @return array<string, array<string, string>>
+     */
+    public static function brandingPresets(): array
+    {
+        $cachet = FilamentColor::getColors()['cachet'];
+        $presets = ['cachet' => [$cachet[500], $cachet[500], $cachet[500], $cachet[400]]];
+
+        foreach (self::BRANDING_SHADES as $name => $shades) {
+            $palette = Color::all()[$name];
+            $presets[$name] = array_map(fn (int $shade): string => $palette[$shade], $shades);
+        }
+
+        return array_map(fn (array $colors): array => array_combine(
+            ['metrics_fill_color', 'link_color', 'metrics_fill_color_dark', 'link_color_dark'],
+            array_map(fn (string $color): string => strtolower(self::toHex($color)), $colors),
+        ), $presets);
+    }
+
+    /**
+     * Page background colors, light and dark, for each named base color.
+     *
+     * @return array<string, array<string, string>>
+     */
+    public static function brandingBases(): array
+    {
+        $bases = [];
+
+        foreach (self::GRAYS as $gray) {
+            $bases[$gray] = [
+                'background_color' => strtolower(self::toHex(Color::all()[$gray][50])),
+                'background_color_dark' => strtolower(self::toHex(Color::all()[$gray][900])),
+            ];
+        }
+
+        return $bases;
+    }
+
+    /**
+     * The named branding color whose brand colors equal the given ones, if any.
+     *
+     * @param  array<string, string|null>  $brandColors
+     */
+    public static function matchBranding(array $brandColors): ?string
+    {
+        return self::matchPreset(self::brandingPresets(), $brandColors);
+    }
+
+    /**
+     * The named base color whose background colors equal the given ones, if any.
+     *
+     * @param  array<string, string|null>  $backgroundColors
+     */
+    public static function matchBase(array $backgroundColors): ?string
+    {
+        return self::matchPreset(self::brandingBases(), $backgroundColors);
+    }
+
+    /**
+     * Match the base color paired with the given branding color, falling back
+     * to a neutral gray for colors Cachet has no explicit pairing for.
+     */
+    public static function matchPairing(?string $branding): string
+    {
+        return self::THEME_PAIRINGS[$branding] ?? self::DEFAULT_PAIRING;
+    }
+
+    /**
+     * @param  array<string, array<string, string>>  $presets
+     * @param  array<string, string|null>  $colors
+     */
+    private static function matchPreset(array $presets, array $colors): ?string
+    {
+        $colors = array_map(fn ($color) => is_string($color) ? strtolower($color) : $color, $colors);
+
+        foreach ($presets as $name => $preset) {
+            $candidate = array_intersect_key($colors, $preset);
+            ksort($candidate);
+            ksort($preset);
+
+            if ($candidate === $preset) {
+                return $name;
+            }
+        }
+
+        return null;
+    }
 
     /**
      * Palette built from a configurable status color (success, info, alert, error, notice).
@@ -51,6 +189,9 @@ final class ThemeData extends BaseData
 
     /** @var array<string, array{light: string, dark: string}> */
     private array $formDefaults = [];
+
+    /** @var array<string, string> */
+    private array $pristineDefaults = [];
 
     public function __construct(
         #[Required]
@@ -112,6 +253,8 @@ final class ThemeData extends BaseData
                 ? $colors['dark']
                 : $this->color($lightValue, $colors['dark']);
             $darkVariables['--'.$cssName] = $this->color($this->themeSettings->{$darkSetting}, $darkFallback);
+            $this->pristineDefaults[$setting] = $this->toHex($colors['light']);
+            $this->pristineDefaults[$setting.'_dark'] = $this->toHex($colors['dark']);
             $this->formDefaults[$setting] = [
                 'light' => $this->toHex($colors['light']),
                 'dark' => $this->toHex($darkFallback),
@@ -163,7 +306,7 @@ final class ThemeData extends BaseData
             : $fallback;
     }
 
-    private function toHex(string $color): string
+    private static function toHex(string $color): string
     {
         if (preg_match('/^rgba?\(\s*(\d+)\s+(\d+)\s+(\d+)(?:\s*\/\s*([\d.]+%?))?\s*\)$/i', $color, $matches)) {
             $color = sprintf('#%02x%02x%02x', $matches[1], $matches[2], $matches[3]);
@@ -192,6 +335,16 @@ final class ThemeData extends BaseData
     public function lightColors(): array
     {
         return $this->lightColors;
+    }
+
+    /**
+     * Every color's built-in default, ignoring what is stored.
+     *
+     * @return array<string, string>
+     */
+    public function pristineDefaults(): array
+    {
+        return $this->pristineDefaults;
     }
 
     /**
